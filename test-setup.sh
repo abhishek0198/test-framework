@@ -6,7 +6,7 @@ source helper.sh
 # read script parameters
 clean_previous_build=true
 
-while getopts :n:v:ru FLAG; do
+while getopts :n:v:r FLAG; do
     case $FLAG in
         n)
             product_name=$OPTARG
@@ -14,7 +14,7 @@ while getopts :n:v:ru FLAG; do
         v)
             product_version=$OPTARG
             ;;
-        ru)
+        r)
             clean_previous_build=false
             ;;
         \?) 
@@ -23,22 +23,21 @@ while getopts :n:v:ru FLAG; do
     esac
 done
 
-if [[ -z ${product_name} ]] || [[ -z ${product_version} ]]; then
-   display_usage
-fi
-
 product_path="$DOCKERFILE_HOME/$product_name"
-
-if $clean_previous_build; then 
-    clean_existing_images "${product_name}" "${product_version}"
-fi
-
 pushd $product_path >> /dev/null
 
-echo 
-echo "Starting building image..."
-echo
-bash build.sh -v $product_version 
+stop_docker_container "${product_name}" "${product_version}"
+
+# clean existing docker build unless specified otherwise, 
+# Also do a new build as well
+if $clean_previous_build; then 
+    clean_docker_image "${product_name}" "${product_version}"
+    
+    echo 
+    echo "Starting building image..."
+    echo
+    bash build.sh -v $product_version
+fi
 
 echo 
 echo "Starting running image..."
@@ -53,4 +52,7 @@ echo
 
 # check if ports are open 
 check_ports
+
+# check if carbon server is up
+check_carbon_server
 
