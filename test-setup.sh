@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 DOCKERFILE_HOME=/home/abhishek/dev/dockerfiles
+
 source helper.sh
+source docker-utils.sh
 
 # read script parameters
 clean_previous_build=true
