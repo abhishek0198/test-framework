@@ -12,7 +12,7 @@ function get_docker_container_ip() {
 
 # clean a docker image using product tag
 function clean_docker_image() {
-   product_tag="${1}:${2}"
+   product_tag="$product_name:$product_version"
    if docker history -q $product_tag > /dev/null 2>&1; then
        echo "Removing docker image $product_tag"
        docker rmi $product_tag >> /dev/null
@@ -21,9 +21,7 @@ function clean_docker_image() {
 
 # stop a running docker container using product tag before running tests.
 function stop_docker_container() {
-   product_tag="${1}:${2}"
-   container_id=$(docker ps -a -q --filter ancestor="$product_tag")
-
+   container_id=$(docker ps | grep $product_name | awk '{print $1}')
    # if container exists, stop and remove the container
    if [ -n "$container_id" ]; then
        echo "Stoping container $container_id" 
@@ -31,5 +29,9 @@ function stop_docker_container() {
    fi
 }
 
-
+function copy_carbon_logs() {
+    container_id=$(docker ps | grep $product_name | awk '{print $1}')
+    ip=$(get_docker_container_ip)
+    docker cp "$container_id:/mnt/$ip/$product_name-$product_version/repository/logs/" ./
+}
 
