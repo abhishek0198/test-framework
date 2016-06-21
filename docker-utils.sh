@@ -21,7 +21,7 @@ function clean_docker_image() {
 
 # stop a running docker container using product tag before running tests.
 function stop_docker_container() {
-   container_id=$(docker ps | grep $product_name | awk '{print $1}')
+   container_id=$(docker ps -a | grep $product_name | awk '{print $1}')
    # if container exists, stop and remove the container
    if [ -n "$container_id" ]; then
        echo "Stoping container $container_id" 

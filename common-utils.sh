@@ -1,4 +1,5 @@
 #/bin/bash
+set -e
 
 # show usage of test framework
 function display_usage() {
@@ -24,7 +25,8 @@ function check_ports() {
     for port in "${ports_to_check[@]}"
     do
         nc -z -v -w5 $host_ip $port
-    done 
+    done
+    echo 
 }
 
 # check if the web server has been started successfully
@@ -37,17 +39,41 @@ function check_wso2_carbon_server_status() {
         echo "Carbon server is up and running."
     else
         echo "Carbon server is not running."
-    fi    
+    fi   
 }
 
 # check wso2 carbon logs from the running container for any errors
 function check_wso2_carbon_logs() {
     # copy logs from Docker container to local
     copy_carbon_logs
-    pushd logs >> /dev/null
-    errors=$(grep -ir 'error' .)
-    popd >> /dev/null
-    if [[ $errors ]]; then
+    #pushd logs >> /dev/null
+    #errors=$(grep -ir 'error' .)
+    #popd >> /dev/null
+    echo
+    if $(grep -ri 'error' "./logs"); then
         echo "WSO2 Carbon logs contain errors. Please verify them in ./logs/."
+    else  
+        echo "WSO2 Carbon logs does not contain any errors."
+        rm -rf "./logs"
+    fi
+    echo 
+}
+
+function check_build_logs() {
+    if $(grep -i 'error' "$test_script_path/$buildlogs"); then
+        echo "Docker build has errors. Please verify them in $buildlogs"
+    else
+        echo "No errors found in $buildlogs"
+        rm "$test_script_path/$buildlogs"
     fi
 }
+
+function check_run_logs() {
+    if $(grep -i 'error' "$test_script_path/$runlogs"); then    
+        echo "Docker container run has errors. Please verify them in $runlogs"
+    else
+        echo "No errors found in $runlogs"
+        rm "$test_script_path/$runlogs"
+    fi    
+}
+

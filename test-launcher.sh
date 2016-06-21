@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
+
+###### GLOBAL VARS START ##########
 DOCKERFILE_HOME=/home/abhishek/dev/dockerfiles
+buildlogs="buildlogs.logs"
+runlogs="runlogs.log"
+###### GLOBAL VARS END ###########
 
 source common-utils.sh
 source docker-utils.sh
@@ -26,6 +31,8 @@ while getopts :n:v:r FLAG; do
 done
 
 product_path="$DOCKERFILE_HOME/$product_name"
+test_script_path=$(pwd)
+
 pushd $product_path >> /dev/null
 
 stop_docker_container
@@ -38,13 +45,15 @@ if $clean_previous_build; then
     echo 
     echo "Starting building image..."
     echo
-    bash build.sh -v $product_version
+    bash build.sh -v $product_version > "$test_script_path/$buildlogs" 2>&1
+    check_build_logs
 fi
 
 echo 
 echo "Starting running image..."
 echo
-bash run.sh -v $product_version -s
+bash run.sh -v $product_version -s > "$test_script_path/$runlogs" 2>&1
+check_run_logs
 
 popd >> /dev/null 
 
