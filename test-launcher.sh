@@ -52,7 +52,7 @@ fi
 echo 
 echo "Starting running image..."
 echo
-bash run.sh -v $product_version -s > "$test_script_path/$runlogs" 2>&1
+echo "n n" | bash run.sh -v $product_version > "$test_script_path/$runlogs" 2>&1
 check_run_logs
 
 popd >> /dev/null 
