@@ -4,10 +4,19 @@ WSO2 Dockerfiles provides Dockerfiles for many WSO2 products and allows users to
 
 ## Running standard tests
 Set Dockerfiles home in test-launcher.sh  
-Launch test using ```test-launcher.sh -n <product-name> -v <product-version>i```  
-You can specify -r if you would like to use an existing docker image for this product.
+Configure products to test along with desired provisioning in test-config.json
+Launch test using ```python test-runner.py```  
 
-For instance to test WSO2ESB in Dockerfiles, use the following:  
-```./test-launcher.sh -n wso2esb -v 4.9.0```
+For instance to test WSO2ESB using puppet provisioning, use the following:  
+```        
+	"products": {
+                "esb": {
+                        "enabled":"true",
+                        "name": "wso2esb",
+                        "version": "4.9.0",
+                        "provisioning_method": "puppet"
+                }
+        }
+```
 
 

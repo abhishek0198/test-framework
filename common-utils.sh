@@ -42,7 +42,7 @@ function check_ports() {
     ports_to_check=("${port_array[@]:1}")
     for port in "${ports_to_check[@]}"
     do
-        nc -z -v -w5 $host_ip $port
+        nc -z -v -w5 $host_ip $port >> $test_result_file 2>&1
     done
     echo 
 }

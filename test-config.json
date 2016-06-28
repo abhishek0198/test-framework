@@ -1,0 +1,18 @@
+{
+	"products": {
+		"esb": {
+			"enabled":"true",
+			"name": "wso2esb",
+			"version": "4.9.0",
+			"provisioning_method": "puppet"
+		},
+		"mb": {
+			"enabled":"false",
+			"name": "wso2mb",
+			"version": "3.1.0",
+			"provisioning_method": "puppet",
+			"platform": "default"
+		}
+	},
+	"test_result_file": "/home/abhishek/dev/test-framework/output.txt"
+}
