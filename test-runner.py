@@ -38,5 +38,5 @@ for product in products_to_test.keys():
 		provisioning_method = product_settings['provisioning_method']
 		test_command = './test-launcher.sh -n ' + product_name + ' -v ' + product_version + ' -r ' + provisioning_method + ' -f ' + filepath
 		with open(filepath, "a") as output_file:
-			subprocess.call(shlex.split(test_command), stdout=output_file)
+			subprocess.call(shlex.split(test_command), stdout=output_file, stderr=output_file)
 	

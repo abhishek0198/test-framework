@@ -17,7 +17,7 @@
 
 # ------------------------------------------------------------------------
 
-set -e
+#set -e
 
 ###### GLOBAL VARS START ##########
 DOCKERFILE_HOME=/home/abhishek/dev/dockerfiles
@@ -79,7 +79,7 @@ clean_docker_image
 echo
 echo "Starting building image..."
 echo
-bash build.sh -v $product_version -r $provisioning_method > "$test_script_path/$buildlogs" 2>&1
+bash build.sh -v $product_version -r $provisioning_method -q > "$test_script_path/$buildlogs" 2>&1
 
 echo "Checking docker build logs"
 check_build_logs
@@ -125,3 +125,5 @@ clean_docker_image
 
 TEST_END_TIME=$(date +%s)
 echo "Test completed in $[$TEST_END_TIME-$TEST_START_TIME] seconds"
+echo
+echo

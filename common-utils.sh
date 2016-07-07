@@ -17,7 +17,7 @@
 
 # ------------------------------------------------------------------------
 
-set -e
+#set -e
 
 # show usage of test framework
 function display_usage() {
