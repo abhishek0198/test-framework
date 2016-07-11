@@ -1,0 +1,6 @@
+/bin/*
+bin/*
+output.txt
+.project
+/pkg/*
+pkg/*
