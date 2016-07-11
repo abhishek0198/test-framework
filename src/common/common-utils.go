@@ -4,15 +4,15 @@ import (
 	"flag"
 	"log"
 	"os/exec"
-	"strings"
-	"math"
-	"time"
 	"strconv"
+	"strings"
+	"time"
 )
- const (
-	 TotalPortCheckAttempts = 10	 
- )
- 
+
+const (
+	TotalCheckAttempts = 10
+)
+
 func CreateProductConfig() *Product {
 	productName := flag.String("n", "", "product name to test")
 	productVersion := flag.String("v", "", "product version to test")
@@ -95,19 +95,24 @@ func CheckExposedPorts(productName string) {
 	}
 }
 
-func CheckPortWithTimeout(containerIp string, port string) {
-	for i := 1; i <= TotalPortCheckAttempts; i++ {
+func CheckPortWithTimeout(containerIp string, port string) bool {
+	for i := 1; i <= TotalCheckAttempts; i++ {
 		portCheckCommand := "nc -z -v -w5 " + containerIp + " " + strings.TrimSpace(port)
 		err := RunCommandAndGetError(portCheckCommand)
 
 		if err != nil {
-			log.Println("Attempt: " + string(i) + ". Port " + port +" is not open in the docker container.")
+			log.Println("Attempt: " + strconv.Itoa(i) + ". Port " + port + " is not open in the docker container.")
+
+			sleepTime := 2 * i
+			log.Println("Sleeping for " + strconv.Itoa(sleepTime) + " seconds")
+			time.Sleep(time.Duration(int32(sleepTime)) * time.Second)
+		} else {
+			log.Println("Port " + port + " is open in the docker container.")
+			return true
 		}
-		
-		sleepTime := math.Pow(2, float64(i))
-		log.Println("Sleeping for " + strconv.FormatFloat(sleepTime, 'E', -1, 64) + " seconds")		
-		time.Sleep(time.Duration(int32(sleepTime)) * time.Second)
 	}
+
+	return false
 }
 
 func CheckWso2CarbonServerStatus(productName string) {
@@ -115,12 +120,19 @@ func CheckWso2CarbonServerStatus(productName string) {
 	command := "curl --insecure --write-out %{http_code} --silent --output /dev/null https://" +
 		containerIp + ":" + Testconfig.Carbon_Server_Port +
 		"/carbon/admin/login.jsp"
-	result := RunCommandAndGetOutput(command)
-	if result == "200" {
-		log.Println("Carbon server is up and running.")
-	} else {
-		log.Println("Caron server is not running.")
-	}
+		
+	for i := 1; i <= TotalCheckAttempts; i++ {
+		result := RunCommandAndGetOutput(command)
+		if result == "200" {
+			log.Println("Carbon server is up and running.")
+			return
+		} else {
+			log.Println("Attempt: " + strconv.Itoa(i) + "Carbon server is not running.")
+			sleepTime := 2 * i
+			log.Println("Sleeping for " + strconv.Itoa(sleepTime) + " seconds")
+			time.Sleep(time.Duration(int32(sleepTime)) * time.Second)
+		}
+	}	
 }
 
 func CheckWso2CarbonServerLogs(productName string, productVersion string) {
@@ -129,8 +141,8 @@ func CheckWso2CarbonServerLogs(productName string, productVersion string) {
 	CopyWSO2CarbonLogs(productName, productVersion)
 	command := "grep -ir 'error' ./" + productName + productVersion + "logs"
 	err := RunCommandAndGetError(command)
-	
-	if err != nil {
+
+	if err == nil {
 		log.Println("Errors founds in carbon server logs, please check them under " +
 			productName + productVersion + "logs")
 	} else {

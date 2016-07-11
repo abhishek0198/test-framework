@@ -58,7 +58,13 @@ func RunTest(product common.Product) {
 		common.CheckExposedPorts(product.Name)
 		common.CheckWso2CarbonServerStatus(product.Name)
 		common.CheckWso2CarbonServerLogs(product.Name, product.Version)
-
+		
+		// Do cleanup
+		common.StopAndRemoveDockerContainer(product.Name)
+		common.CleanDockerImage(product.Name + ":" + product.Version)
+		
+		// Reset globals for next product test run
 		common.ResetTestSpecificVariables()
+		log.Println("Test completed for " + product.Name + ", " + product.Version + ". \n\n")
 	}
 }
