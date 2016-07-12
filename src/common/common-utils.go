@@ -140,7 +140,7 @@ func CheckWso2CarbonServerStatus(productName string) {
 	command := "curl --insecure --write-out %{http_code} --silent --output /dev/null https://" +
 		containerIp + ":" + Testconfig.Carbon_Server_Port +
 		"/carbon/admin/login.jsp"
-		
+
 	for i := 1; i <= TotalCheckAttempts; i++ {
 		result := RunCommandAndGetOutput(command)
 		if result == "200" {
@@ -152,7 +152,7 @@ func CheckWso2CarbonServerStatus(productName string) {
 			log.Println("Sleeping for " + strconv.Itoa(sleepTime) + " seconds")
 			time.Sleep(time.Duration(int32(sleepTime)) * time.Second)
 		}
-	}	
+	}
 }
 
 func CheckWso2CarbonServerLogs(productName string, productVersion string) {
