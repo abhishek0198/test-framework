@@ -39,11 +39,12 @@ WSO2 Puppet Modules (https://github.com/wso2/puppet-modules)
 You will also need to download java and product specific zip files. Instructions can be found on WSO2 Dockerfiles.  
 
 Once above setup is completed, follow following steps to run the tests:  
-1. Set dockerfileshome and carob_server_port in src/config/test-config.json  
-2. Configure products to test along with desired provisioning in src/config/test-config.json  
+1. Edit TestConfigPath under <project_root>/src/common/test-config.json and rebuild the project
+2. Set dockerfileshome and carob_server_port in <project_root>/src/config/test-config.json  
+2. Configure products to test along with desired provisioning in <project_root>/src/config/test-config.json  
 3. Launch test using ```./main``` from bin directory  
 
-For instance, here is a sample test config to test WSO2ESB using default and WSO2MB using puppet provisioning.
+Here is a sample test config to test WSO2ESB using default and WSO2MB using puppet provisioning.
 
 ```        
 {
