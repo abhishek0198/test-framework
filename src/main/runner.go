@@ -27,15 +27,17 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"io"
 )
 
 func main() {
 	startTime := time.Now()
-
+	
 	ParseTestConfig()
+	
 	f := InitializeLogging(common.Testconfig.Output_file)
 	defer f.Close()
-
+	
 	var ProductsToTest []common.Product
 	ProductsToTest = common.Testconfig.Wso2_products
 	for _, product := range ProductsToTest {
@@ -43,7 +45,7 @@ func main() {
 	}
 
 	totalTime := time.Now().Sub(startTime)
-	log.Println("Tests completed in " + totalTime.String())
+	common.Logger.Println("Tests completed in " + totalTime.String())
 }
 
 func InitializeLogging(outputFile string) *os.File {
@@ -53,7 +55,8 @@ func InitializeLogging(outputFile string) *os.File {
 	}
 
 	log.SetOutput(f)
-	log.Println("Logging initialized")
+	common.Logger = log.New(io.MultiWriter(f,os.Stdout), "", log.Lshortfile|log.LstdFlags)
+	common.Logger.Println("Logging initialized")
 	return f
 }
 
@@ -65,12 +68,12 @@ func RunTest(product common.Product) {
 	}
 
 	if enabled {
-		log.Println("Running tests for " + product.Name + ", " + product.Version +
+		common.Logger.Println("Running tests for " + product.Name + ", " + product.Version +
 			" using profile " + product.Provisioning_method +
 			", using platform: " + product.Platform)
 
-		common.CleanDockerImage(product.Name + ":" + product.Version)
 		common.StopAndRemoveDockerContainer(product.Name)
+		common.CleanDockerImage(product.Name + ":" + product.Version)
 		common.BuildImage(product)
 		common.CheckBuildLogs(product.Name, product.Version)
 		common.RunImage(product)
@@ -78,13 +81,13 @@ func RunTest(product common.Product) {
 		common.CheckExposedPorts(product.Name)
 		common.CheckWso2CarbonServerStatus(product.Name)
 		common.CheckWso2CarbonServerLogs(product.Name, product.Version)
-
+		
 		// Do cleanup
 		common.StopAndRemoveDockerContainer(product.Name)
 		common.CleanDockerImage(product.Name + ":" + product.Version)
 
 		// Reset globals for next product test run
 		common.ResetTestSpecificVariables()
-		log.Println("Test completed for " + product.Name + ", " + product.Version + ". \n\n")
+		common.Logger.Println("Test completed for " + product.Name + ", " + product.Version + ". \n\n")
 	}
 }

@@ -22,7 +22,6 @@ package common
 
 import (
 	"flag"
-	"log"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -51,7 +50,7 @@ func CreateProductConfig() *Product {
 }
 
 func BuildImage(product Product) {
-	log.Println("Starting building image...")
+	Logger.Println("Starting building image...")
 	commandPath := Testconfig.DockerfilesHome + "/" + product.Name + "/" + "build.sh"
 	logFileName := product.Name + product.Version + RunLogs
 	args := " -v " + product.Version + " -r " + product.Provisioning_method + " -q > " + logFileName + " 2>&1"
@@ -59,12 +58,12 @@ func BuildImage(product Product) {
 	_, err := exec.Command("/bin/bash", "-c", command).Output()
 
 	if err == nil {
-		log.Println("Successfully built docker image.")
+		Logger.Println("Successfully built docker image.")
 	}
 }
 
 func RunImage(product Product) {
-	log.Println("Running image...")
+	Logger.Println("Running image...")
 	commandPath := Testconfig.DockerfilesHome + "/" + product.Name + "/" + "run.sh"
 	logFileName := product.Name + product.Version + RunLogs
 	args := " -v " + product.Version + " > " + logFileName + " 2>&1"
@@ -72,7 +71,7 @@ func RunImage(product Product) {
 	_, err := exec.Command("/bin/bash", "-c", "echo 'n n' | "+command).Output()
 
 	if err == nil {
-		log.Println("Successfully ran docker image.")
+		Logger.Println("Successfully ran docker image.")
 	}
 }
 
@@ -81,9 +80,9 @@ func CheckBuildLogs(productName string, productVersion string) {
 	command := "grep -i 'error' " + logFileName
 	_, err := exec.Command("/bin/bash", "-c", command).Output()
 	if err == nil {
-		log.Println("Found errors in docker build logs, please check " + logFileName)
+		Logger.Println("Found errors in docker build logs, please check " + logFileName)
 	} else {
-		log.Println("No errors were found in docker build logs")
+		Logger.Println("No errors were found in docker build logs")
 		command := "rm ./" + logFileName
 		RunCommandAndGetError(command)
 	}
@@ -94,9 +93,9 @@ func CheckRunLogs(productName string, productVersion string) {
 	command := "grep -i 'error' " + logFileName
 	_, err := exec.Command("/bin/bash", "-c", command).Output()
 	if err == nil {
-		log.Println("Found errors in docker run logs, please check " + logFileName)
+		Logger.Println("Found errors in docker run logs, please check " + logFileName)
 	} else {
-		log.Println("No errors were found in docker run logs")
+		Logger.Println("No errors were found in docker run logs")
 		command := "rm ./" + logFileName
 		RunCommandAndGetError(command)
 	}
@@ -121,13 +120,13 @@ func CheckPortWithTimeout(containerIp string, port string) bool {
 		err := RunCommandAndGetError(portCheckCommand)
 
 		if err != nil {
-			log.Println("Attempt: " + strconv.Itoa(i) + ". Port " + port + " is not open in the docker container.")
+			Logger.Println("Attempt: " + strconv.Itoa(i) + ". Port " + port + " is not open in the docker container.")
 
 			sleepTime := 2 * i
-			log.Println("Sleeping for " + strconv.Itoa(sleepTime) + " seconds")
+			Logger.Println("Sleeping for " + strconv.Itoa(sleepTime) + " seconds")
 			time.Sleep(time.Duration(int32(sleepTime)) * time.Second)
 		} else {
-			log.Println("Port " + port + " is open in the docker container.")
+			Logger.Println("Port " + port + " is open in the docker container.")
 			return true
 		}
 	}
@@ -144,29 +143,29 @@ func CheckWso2CarbonServerStatus(productName string) {
 	for i := 1; i <= TotalCheckAttempts; i++ {
 		result := RunCommandAndGetOutput(command)
 		if result == "200" {
-			log.Println("Carbon server is up and running.")
+			Logger.Println("Carbon server is up and running.")
 			return
 		} else {
-			log.Println("Attempt: " + strconv.Itoa(i) + "Carbon server is not running.")
+			Logger.Println("Attempt: " + strconv.Itoa(i) + "Carbon server is not running.")
 			sleepTime := 2 * i
-			log.Println("Sleeping for " + strconv.Itoa(sleepTime) + " seconds")
+			Logger.Println("Sleeping for " + strconv.Itoa(sleepTime) + " seconds")
 			time.Sleep(time.Duration(int32(sleepTime)) * time.Second)
 		}
 	}
 }
 
 func CheckWso2CarbonServerLogs(productName string, productVersion string) {
-	log.Println("Checking Carbon server logs for any errors")
+	Logger.Println("Checking Carbon server logs for any errors")
 
 	CopyWSO2CarbonLogs(productName, productVersion)
 	command := "grep -ir 'error' ./" + productName + productVersion + "logs"
 	err := RunCommandAndGetError(command)
 
 	if err == nil {
-		log.Println("Errors founds in carbon server logs, please check them under " +
+		Logger.Println("Errors founds in carbon server logs, please check them under " +
 			productName + productVersion + "logs")
 	} else {
-		log.Println("Carbon server logs does not contain any errors")
+		Logger.Println("Carbon server logs does not contain any errors")
 		command := "rm -rf ./" + productName + productVersion + "logs"
 		RunCommandAndGetError(command)
 	}
@@ -175,7 +174,7 @@ func CheckWso2CarbonServerLogs(productName string, productVersion string) {
 func RunCommandAndGetOutput(command string) string {
 	out, err := exec.Command("/bin/bash", "-c", command).Output()
 	if err != nil {
-		log.Fatal("Unable to run command "+command, err)
+		Logger.Fatal("Unable to run command "+command, err)
 	}
 	return string(out)
 }

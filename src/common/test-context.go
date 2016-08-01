@@ -20,16 +20,19 @@
 
 package common
 
+import "log"
+
 const (
 	BuildLogs      = "buildlogs.log"
 	RunLogs        = "runlogs.log"
-	TestConfigPath = "/home/abhishek/dev/test-framework/src/config/test-config.json"
+	TestConfigPath = "/Users/abhishektiwari/dev/test-framework/src/config/test-config.json"
 )
 
 var (
 	Testconfig        TestConfig
 	DockerContainerID string
 	DockerContainerIP string
+	Logger 			  *log.Logger
 )
 
 type Product struct {
@@ -45,6 +48,7 @@ type TestConfig struct {
 	Wso2_products      []Product
 	Output_file        string
 	DockerfilesHome    string
+	Carbon_Server_Ip   string
 	Carbon_Server_Port string
 }
 

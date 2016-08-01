@@ -21,22 +21,21 @@
 package common
 
 import (
-	"log"
 	"os/exec"
-	"strings"
+	"strings"	
 )
 
 // Function to clean docker image by its tag
 func CleanDockerImage(tag string) {
-	command := "docker history -q " + tag
-	_, err := exec.Command("/bin/bash", "-c", command).Output()
+	command := "docker images -q " + tag
+	out, _ := exec.Command("/bin/bash", "-c", command).Output()
 
-	if err == nil {
-		log.Println("Removing docker image " + tag)
+	if out != nil && len(out) != 0 {
+		Logger.Println("Removing docker image " + tag)
 		_, err := exec.Command("/bin/bash", "-c", "docker rmi "+tag).Output()
 
 		if err == nil {
-			log.Println("Successfully removed docker image")
+			Logger.Println("Successfully removed docker image")
 		}
 	}
 }
@@ -47,16 +46,16 @@ func StopAndRemoveDockerContainer(productName string) {
 	out, err := exec.Command("/bin/bash", "-c", command).Output()
 
 	if err != nil {
-		log.Println("Error in getting docker container id")
-		log.Printf("%s\n", err)
+		Logger.Println("Error in getting docker container id")
+		Logger.Printf("%s\n", err)
 	} else if string(out) != "" {
-		log.Printf("Stopping and removing docker container with id: %s", out)
+		Logger.Printf("Stopping and removing docker container with id: %s", out)
 
 		_, err1 := exec.Command("/bin/bash", "-c", "docker stop "+string(out)).Output()
 		_, err2 := exec.Command("/bin/bash", "-c", "docker rm "+string(out)).Output()
 
 		if err1 == nil && err2 == nil {
-			log.Println("Successfully stopped and removed docker container")
+			Logger.Println("Successfully stopped and removed docker container")
 		}
 	}
 }
@@ -64,14 +63,14 @@ func StopAndRemoveDockerContainer(productName string) {
 // Function to copy WSO2 Carbon serer logs from running container to local
 func CopyWSO2CarbonLogs(productName string, productVersion string) {
 	containerID := GetDockerContainerID(productName)
-	containerIP := GetDockerContainerIP(productName)
+	containerIP := GetDockerContainerIPUsingID(containerID)
 	command := "docker cp " + containerID + ":/mnt/" + containerIP + "/" + productName + "-" +
 		productVersion + "/repository/logs/ ./" + productName + productVersion + "logs"
 	err := RunCommandAndGetError(command)
 	if err != nil {
-		log.Fatal("Unable to copy carbon server logs from docker container")
+		Logger.Fatal("Unable to copy carbon server logs from docker container. Command: " + command + ". Error:" + err.Error())
 	} else {
-		log.Println("Successfully copied carbon server logs from docker container")
+		Logger.Println("Successfully copied carbon server logs from docker container")
 	}
 }
 
@@ -82,12 +81,12 @@ func GetDockerContainerID(productName string) string {
 		out, err := exec.Command("/bin/bash", "-c", command).Output()
 		if err != nil {
 			message := "Error in getting Docker container id. Command: " + command + ". Error: " + err.Error()
-			log.Println(message)
+			Logger.Println(message)
 			panic(message)
 		}
 
 		DockerContainerID = strings.Replace(string(out), "\n", "", 1)
-		log.Println("Setting docker ID " + DockerContainerID)
+		Logger.Println("Setting docker ID " + DockerContainerID)
 	}
 
 	return DockerContainerID
@@ -96,18 +95,28 @@ func GetDockerContainerID(productName string) string {
 // Function to get docker container IP addrses
 func GetDockerContainerIP(productName string) string {
 	if DockerContainerIP == "" {
-		containerId := GetDockerContainerID(productName)
-
-		command := "docker inspect --format '{{ .NetworkSettings.IPAddress }}' " + containerId
-		out, err := exec.Command("/bin/bash", "-c", command).Output()
-		if err != nil {
-			message := "Error in getting docker container IP. Command: " + command + ", Error: " + err.Error()
-			log.Println(message)
-			panic(message)
+		if Testconfig.Carbon_Server_Ip != "" {
+			DockerContainerIP = Testconfig.Carbon_Server_Ip
+		} else {
+			containerId := GetDockerContainerID(productName)
+			containerIp := GetDockerContainerIPUsingID(containerId)
+			
+			DockerContainerIP = containerIp
 		}
-		DockerContainerIP = strings.Replace(string(out), "\n", "", 1)
-		log.Println("Setting docker IP " + DockerContainerIP)
+		
+		Logger.Println("Setting docker IP " + DockerContainerIP)
 	}
 
 	return DockerContainerIP
+}
+
+func GetDockerContainerIPUsingID(id string) string {
+	command := "docker inspect --format '{{ .NetworkSettings.IPAddress }}' " + id
+	out, err := exec.Command("/bin/bash", "-c", command).Output()
+	if err != nil {
+		message := "Error in getting docker container IP. Command: " + command + ", Error: " + err.Error()
+		Logger.Println(message)
+		panic(message)
+	}
+	return strings.Replace(string(out), "\n", "", 1)
 }

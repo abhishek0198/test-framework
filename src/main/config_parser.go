@@ -40,6 +40,11 @@ func ParseTestConfig() {
 	log.Println("Parsing test configuration")
 
 	var configObject jsontype
-	json.Unmarshal(file, &configObject)
+	err = json.Unmarshal(file, &configObject)
+	
+	if err != nil {
+		panic("Could not parse test config json, please check if its correct.")
+	}
+	
 	common.Testconfig = configObject.Testconfig
 }

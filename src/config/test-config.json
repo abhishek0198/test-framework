@@ -15,8 +15,9 @@
             "platform":"default"
          }
       ],
-      "output_file":"/home/abhishek/dev/test-framework/output.txt",
-      "dockerfileshome":"/home/abhishek/dev/dockerfiles",
+      "output_file":"/Users/abhishektiwari/dev/test-framework/output.txt",
+      "dockerfileshome":"/Users/abhishektiwari/dev/dockerfiles",
+      "carbon_server_ip":"192.168.99.100",
       "carbon_server_port":"9443"
    }
 }
