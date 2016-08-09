@@ -22,6 +22,7 @@ package main
 
 import (
 	"github.com/abhishek0198/test-framework/common"
+	"github.com/abhishek0198/test-framework/smoketests"
 	"fmt"
 	"log"
 	"os"
@@ -82,12 +83,15 @@ func RunTest(product common.Product) {
 		common.CheckWso2CarbonServerStatus(product.Name)
 		common.CheckWso2CarbonServerLogs(product.Name, product.Version)
 		
+		// Run smoke tests for this product (if available)
+		smoketests.RunSmokeTest(product.Name)
+		
 		// Do cleanup
 		common.StopAndRemoveDockerContainer(product.Name)
 		common.CleanDockerImage(product.Name + ":" + product.Version)
 
 		// Reset globals for next product test run
 		common.ResetTestSpecificVariables()
-		common.Logger.Println("Test completed for " + product.Name + ", " + product.Version + ". \n\n")
+		common.Logger.Println("Test completed for " + product.Name + ", " + product.Version + ". \n\n")		
 	}
 }

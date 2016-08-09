@@ -32,7 +32,7 @@ var (
 	Testconfig        TestConfig
 	DockerContainerID string
 	DockerContainerIP string
-	Logger 			  *log.Logger
+	Logger            *log.Logger
 )
 
 type Product struct {
@@ -45,11 +45,13 @@ type Product struct {
 }
 
 type TestConfig struct {
-	Wso2_products      []Product
-	Output_file        string
-	DockerfilesHome    string
-	Carbon_Server_Ip   string
-	Carbon_Server_Port string
+	Wso2_products          []Product
+	Output_file            string
+	DockerfilesHome        string
+	Carbon_Server_Ip       string
+	Carbon_Server_Port     string
+	Carbon_Server_Username string
+	Carbon_Server_Password string
 }
 
 func ResetTestSpecificVariables() {
