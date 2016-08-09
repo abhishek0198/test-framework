@@ -11,12 +11,13 @@ These instuctions are sepecific to Mac OSX, there should be similar counter part
      ` export GOPATH=$HOME/go `  
      ` export PATH=$PATH:$GOPATH/bin ` 
 + Get the project source
-   ` go get github.com/abhishek0198/test-framework `
-+ The above command will automatically build the project and the binary will be gererated at $GOPATH/bin. You can launch the framework by simply using ``` test-framework ``` command.  
-If you need to rebuild the project,  
+   ` go get -d github.com/abhishek0198/test-framework `
++ Build the project,  
   * cd $GOPATH/src/github.com/abhishek0198/test-framework  
   * go build
-   
++ Lauch the test framework using  
+  ` ./test-framework `
+
 ## Running standard tests
 The test framework also requires setting up project relevent to your tests. Following are the projects that you should clone:  
 WSO2 Dockerfiles (https://github.com/wso2/dockerfiles)  
