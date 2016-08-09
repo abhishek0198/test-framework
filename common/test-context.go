@@ -25,7 +25,7 @@ import "log"
 const (
 	BuildLogs      = "buildlogs.log"
 	RunLogs        = "runlogs.log"
-	TestConfigPath = "/Users/abhishektiwari/dev/test-framework/src/config/test-config.json"
+	TestConfigPath = "config/test-config.json"
 )
 
 var (
