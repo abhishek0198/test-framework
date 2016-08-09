@@ -21,7 +21,7 @@
 package main
 
 import (
-	"common"
+	"github.com/abhishek0198/test-framework/common"
 	"fmt"
 	"log"
 	"os"

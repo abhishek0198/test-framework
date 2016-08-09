@@ -21,7 +21,7 @@
 package main
 
 import (
-	"common"
+	"github.com/abhishek0198/test-framework/common"
 	"encoding/json"
 	"io/ioutil"
 	"log"
