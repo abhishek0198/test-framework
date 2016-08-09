@@ -31,6 +31,8 @@ Once above setup is completed, follow following steps to run the tests:
 2. Configure products to test along with desired provisioning in <project_root>/src/config/test-config.json  
 3. Launch test using ```./main``` from bin directory  
 
+IMPORTANT: In order to support running on Mac OSX, `carbon_server_ip` is explicity set to use docker-machine's host IP. Remove this config, if you're running on Linux
+
 Here is a sample test config to test WSO2ESB using default and WSO2MB using puppet provisioning.
 
 ```        
