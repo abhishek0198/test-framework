@@ -26,10 +26,10 @@ WSO2 Puppet Modules (https://github.com/wso2/puppet-modules)
 You will also need to download java and product specific zip files. Instructions can be found on WSO2 Dockerfiles.  
 
 Once above setup is completed, follow following steps to run the tests:  
-1. Edit TestConfigPath under <project_root>/src/common/test-config.json and rebuild the project  
+1. Edit TestConfigPath under <project_root>/src/common/test-config.json 
 2. Set dockerfileshome and carob_server_port in <project_root>/src/config/test-config.json  
 2. Configure products to test along with desired provisioning in <project_root>/src/config/test-config.json  
-3. Launch test using ```./main``` from bin directory  
+3. Launch test using ```./test-framework``` from the same directory  
 
 IMPORTANT: In order to support running on Mac OSX, `carbon_server_ip` is explicity set to use docker-machine's host IP. Remove this config, if you're running on Linux
 
