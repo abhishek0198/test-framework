@@ -43,19 +43,38 @@ Here is a sample test config to test WSO2ESB using default and WSO2MB using pupp
             "enabled":"True",
             "name":"wso2esb",
             "version":"4.9.0",
-            "provisioning_method":"default"
+            "provisioning_method":["default","puppet"],
+            "platform":"default"
+         },
+         {
+            "enabled":"True",
+            "name":"wso2mb",
+            "version":"3.1.0",
+            "provisioning_method":["puppet"],
+            "platform":"default"
          },
          {
             "enabled":"False",
-            "name":"wso2mb",
-            "version":"3.1.0",
-            "provisioning_method":"puppet",
+            "name":"wso2esb",
+            "version":"4.9.0",
+            "provisioning_method":["puppet"],
+            "platform":"kubernetes",
+            "profile":["worker", "manager"]
+         },
+         {
+            "enabled":"False",
+            "name":"wso2am",
+            "version":"2.0.0",
+            "provisioning_method":["default"],
             "platform":"default"
          }
       ],
-      "output_file":"/home/abhishek/dev/test-framework/output.txt",
-      "dockerfileshome":"/home/abhishek/dev/dockerfiles",
-      "carbon_server_port":"9443"
+      "output_file":"dockerfiles-test-result.txt",
+      "dockerfileshome":"/Users/abhishektiwari/dev/dockerfiles",
+      "carbon_server_ip":"192.168.99.100",
+      "carbon_server_port":"9443",
+      "carbon_server_username":"admin",
+      "carbon_server_password":"admin"
    }
 }
 ```
