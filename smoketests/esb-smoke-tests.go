@@ -10,8 +10,10 @@ func RunESBSmokeTests() {
 }
 
 func TestProxyServiceCreationAndRemoval() {
-	common.LoginToCarbonServer()
-	common.CreateProxyService("test", "http://test.com")
-	common.DoesProxyServiceExist("test")
-	common.DeleteProxyService("test")
+	ip := common.GetDockerContainerIP("esb")
+
+	common.LoginToCarbonServer(ip)
+	common.CreateProxyService("test", "http://test.com", ip)
+	common.DoesProxyServiceExist("test", ip)
+	common.DeleteProxyService("test", ip)
 }

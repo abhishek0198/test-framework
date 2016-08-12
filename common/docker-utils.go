@@ -22,15 +22,24 @@ package common
 
 import (
 	"os/exec"
-	"strings"	
+	"strings"
 )
+
+// Function to check if Docker daemon is running
+func IsDockerDaemonRunning() bool {
+	command := "docker version"
+	_, err := exec.Command("/bin/bash", "-c", command).Output()
+
+	if err != nil {
+		Logger.Println("Docker daemon is not running. Exiting test framework")
+		return false
+	}
+	return true
+}
 
 // Function to clean docker image by its tag
 func CleanDockerImage(tag string) {
-	command := "docker images -q " + tag
-	out, _ := exec.Command("/bin/bash", "-c", command).Output()
-
-	if out != nil && len(out) != 0 {
+	if DoesDockerImageExist(tag) {
 		Logger.Println("Removing docker image " + tag)
 		_, err := exec.Command("/bin/bash", "-c", "docker rmi "+tag).Output()
 
@@ -60,6 +69,29 @@ func StopAndRemoveDockerContainer(productName string) {
 	}
 }
 
+// Function to check if a docker container is running
+func IsDockerContainerRunning(productName string) bool {
+	containerID := GetDockerContainerID(productName)
+	command := "docker inspect -f {{.State.Running}} " + containerID
+	out, err := exec.Command("/bin/bash", "-c", command).Output()
+
+	if err == nil && string(out) != "true" {
+		return true
+	}
+	return false
+}
+
+// Function to check if a docker image exists for the product name and version
+func DoesDockerImageExist(tag string) bool {
+	command := "docker images -q " + tag
+	out, _ := exec.Command("/bin/bash", "-c", command).Output()
+
+	if out != nil && len(out) != 0 {
+		return true
+	}
+	return false
+}
+
 // Function to copy WSO2 Carbon serer logs from running container to local
 func CopyWSO2CarbonLogs(productName string, productVersion string) {
 	containerID := GetDockerContainerID(productName)
@@ -76,38 +108,27 @@ func CopyWSO2CarbonLogs(productName string, productVersion string) {
 
 // Function to get docker container id for WSO2 product
 func GetDockerContainerID(productName string) string {
-	if DockerContainerID == "" {
-		command := "docker ps | grep " + productName + " | awk '{print $1}'"
-		out, err := exec.Command("/bin/bash", "-c", command).Output()
-		if err != nil {
-			message := "Error in getting Docker container id. Command: " + command + ". Error: " + err.Error()
-			Logger.Println(message)
-			panic(message)
-		}
-
-		DockerContainerID = strings.Replace(string(out), "\n", "", 1)
-		Logger.Println("Setting docker ID " + DockerContainerID)
+	command := "docker ps | grep " + productName + " | awk '{print $1}'"
+	out, err := exec.Command("/bin/bash", "-c", command).Output()
+	if err != nil {
+		message := "Error in getting Docker container id. Command: " + command + ". Error: " + err.Error()
+		Logger.Println(message)
+		panic(message)
 	}
 
-	return DockerContainerID
+	return strings.Replace(string(out), "\n", "", 1)
 }
 
 // Function to get docker container IP addrses
 func GetDockerContainerIP(productName string) string {
-	if DockerContainerIP == "" {
-		if Testconfig.Carbon_Server_Ip != "" {
-			DockerContainerIP = Testconfig.Carbon_Server_Ip
-		} else {
-			containerId := GetDockerContainerID(productName)
-			containerIp := GetDockerContainerIPUsingID(containerId)
-			
-			DockerContainerIP = containerIp
-		}
-		
-		Logger.Println("Setting docker IP " + DockerContainerIP)
-	}
+	if Testconfig.Carbon_Server_Ip != "" {
+		return Testconfig.Carbon_Server_Ip
+	} else {
+		containerId := GetDockerContainerID(productName)
+		containerIp := GetDockerContainerIPUsingID(containerId)
 
-	return DockerContainerIP
+		return containerIp
+	}
 }
 
 func GetDockerContainerIPUsingID(id string) string {

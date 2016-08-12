@@ -47,19 +47,19 @@ func getHttpClient() http.Client {
 }
 
 // Function to login to wso2 carbon server using default credentials
-func LoginToCarbonServer() {
+func LoginToCarbonServer(ip string) {
 	client := getHttpClient()
-	carbonLoginUrl := "https://" + DockerContainerIP + ":" + Testconfig.Carbon_Server_Port + LoginURL
+	carbonLoginUrl := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + LoginURL
 	resp, err := client.PostForm(carbonLoginUrl, url.Values{
 		"password": {Testconfig.Carbon_Server_Username},
 		"username": {Testconfig.Carbon_Server_Password},
 	})
 	check(err)
 	defer resp.Body.Close()
-	
+
 	htmlcontent, err := ioutil.ReadAll(resp.Body)
 	check(err)
-	
+
 	data := string(htmlcontent)
 	if resp.StatusCode == 200 && strings.Contains(data, "Signed-in as:") {
 		Logger.Println("WSO2 admin user Logged in")
@@ -69,9 +69,9 @@ func LoginToCarbonServer() {
 }
 
 // Function to test if a proxy service exists in wso2 esb
-func DoesProxyServiceExist(serviceName string) {
+func DoesProxyServiceExist(serviceName string, ip string) {
 	client := getHttpClient()
-	url := "https://" + DockerContainerIP + ":" + Testconfig.Carbon_Server_Port + "/services/" + serviceName + "?tryit"
+	url := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + "/services/" + serviceName + "?tryit"
 	resp, err := client.Get(url)
 	defer resp.Body.Close()
 	check(err)
@@ -85,25 +85,25 @@ func DoesProxyServiceExist(serviceName string) {
 }
 
 // Function to create a new proxy service in wso2 esb
-func CreateProxyService(proxyName string, targetURL string) {
+func CreateProxyService(proxyName string, targetURL string, ip string) {
 	client := getHttpClient()
 	args := "?formSubmitted=true&proxyName=" + proxyName + "&targetEndpointMode=url&targetURL=" + targetURL + "&publishWsdlCombo=None&availableTransportsList=https,http,local&trp__https=https&trp__http=http"
-	createServiceUrl := "https://" + DockerContainerIP + ":" + Testconfig.Carbon_Server_Port + CreateProxyURL + args
+	createServiceUrl := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + CreateProxyURL + args
 	resp, err := client.Get(createServiceUrl)
 	defer resp.Body.Close()
-	
+
 	check(err)
 	Logger.Printf("Proxy service creation for service "+proxyName+" completed. Response code: %d\n", resp.StatusCode)
 }
 
 // Function to delete an existing proxy service in wso2 esb
-func DeleteProxyService(proxyName string) {
+func DeleteProxyService(proxyName string, ip string) {
 	client := getHttpClient()
 	args := "?pageNumber=0&serviceGroups=" + proxyName
-	deleteServiceUrl := "https://" + DockerContainerIP + ":" + Testconfig.Carbon_Server_Port + DeleteProxyURL + args
+	deleteServiceUrl := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + DeleteProxyURL + args
 	resp, err := client.Get(deleteServiceUrl)
 	defer resp.Body.Close()
-	
+
 	check(err)
 	Logger.Printf("Proxy service deletion for service "+proxyName+" completed. Response code: %d\n", resp.StatusCode)
 }

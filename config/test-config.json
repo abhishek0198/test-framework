@@ -5,13 +5,29 @@
             "enabled":"True",
             "name":"wso2esb",
             "version":"4.9.0",
-            "provisioning_method":"default"
+            "provisioning_method":["default","puppet"],
+            "platform":"default"
+         },
+         {
+            "enabled":"True",
+            "name":"wso2mb",
+            "version":"3.1.0",
+            "provisioning_method":["puppet"],
+            "platform":"default"
          },
          {
             "enabled":"False",
-            "name":"wso2mb",
-            "version":"3.1.0",
-            "provisioning_method":"default",
+            "name":"wso2esb",
+            "version":"4.9.0",
+            "provisioning_method":["puppet"],
+            "platform":"kubernetes",
+            "profile":["worker", "manager"]
+         },
+         {
+            "enabled":"False",
+            "name":"wso2am",
+            "version":"2.0.0",
+            "provisioning_method":["default"],
             "platform":"default"
          }
       ],

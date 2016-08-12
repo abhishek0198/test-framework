@@ -29,19 +29,18 @@ const (
 )
 
 var (
-	Testconfig        TestConfig
-	DockerContainerID string
-	DockerContainerIP string
-	Logger            *log.Logger
+	Testconfig TestConfig
+	Logger     *log.Logger
 )
 
 type Product struct {
 	Enabled             string
 	Name                string
 	Version             string
-	Provisioning_method string
+	Provisioning_method []string
 	Organization        string
 	Platform            string
+	Profile               []string
 }
 
 type TestConfig struct {
@@ -52,9 +51,4 @@ type TestConfig struct {
 	Carbon_Server_Port     string
 	Carbon_Server_Username string
 	Carbon_Server_Password string
-}
-
-func ResetTestSpecificVariables() {
-	DockerContainerID = ""
-	DockerContainerIP = ""
 }

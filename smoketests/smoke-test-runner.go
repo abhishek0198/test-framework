@@ -1,7 +1,7 @@
 package smoketests
 
 import (
-	"strings"	
+	"strings"
 )
 
 func RunSmokeTest(productName string) {

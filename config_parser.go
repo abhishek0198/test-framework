@@ -21,8 +21,8 @@
 package main
 
 import (
-	"github.com/abhishek0198/test-framework/common"
 	"encoding/json"
+	"github.com/abhishek0198/test-framework/common"
 	"io/ioutil"
 	"log"
 )
@@ -41,10 +41,10 @@ func ParseTestConfig() {
 
 	var configObject jsontype
 	err = json.Unmarshal(file, &configObject)
-	
+
 	if err != nil {
 		panic("Could not parse test config json, please check if its correct.")
 	}
-	
+
 	common.Testconfig = configObject.Testconfig
 }

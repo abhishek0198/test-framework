@@ -21,77 +21,152 @@
 package main
 
 import (
+	"fmt"
 	"github.com/abhishek0198/test-framework/common"
 	"github.com/abhishek0198/test-framework/smoketests"
-	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
 	"time"
-	"io"
 )
 
 func main() {
 	startTime := time.Now()
-	
+
 	ParseTestConfig()
-	
-	f := InitializeLogging(common.Testconfig.Output_file)
+
+	f := initializeLogging()
 	defer f.Close()
-	
-	var ProductsToTest []common.Product
-	ProductsToTest = common.Testconfig.Wso2_products
-	for _, product := range ProductsToTest {
-		RunTest(product)
+
+	if shouldContinue() {
+		runTests()
 	}
 
 	totalTime := time.Now().Sub(startTime)
 	common.Logger.Println("Tests completed in " + totalTime.String())
 }
 
-func InitializeLogging(outputFile string) *os.File {
-	f, err := os.OpenFile(outputFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+func initializeLogging() *os.File {
+	f, err := os.OpenFile(common.Testconfig.Output_file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Printf("Error in opening file %v", err)
 	}
 
 	log.SetOutput(f)
-	common.Logger = log.New(io.MultiWriter(f,os.Stdout), "", log.Lshortfile|log.LstdFlags)
+	common.Logger = log.New(io.MultiWriter(f, os.Stdout), "", log.Lshortfile|log.LstdFlags)
 	common.Logger.Println("Logging initialized")
 	return f
 }
 
-func RunTest(product common.Product) {
-	enabled, err := strconv.ParseBool(product.Enabled)
+func runTests() {
+	var ProductsToTest []common.Product
+	testRunToResultMap := make(map[string]string)
 
-	if err != nil {
-		panic("Could not parse the 'Enabled' field of test config")
+	ProductsToTest = common.Testconfig.Wso2_products
+
+	for _, product := range ProductsToTest {
+		enabled, err := strconv.ParseBool(product.Enabled)
+
+		if err != nil {
+			panic("Could not parse the 'Enabled' field of test config for test - " + product.Name + ":" + product.Version)
+			continue
+		}
+
+		if enabled {
+			var provisioningMethods []string
+			provisioningMethods = product.Provisioning_method
+
+			for _, pMethod := range provisioningMethods {
+				doTestSetup(product.Name, product.Version)
+
+				test := product.Name + ":" + product.Version + ":" + pMethod + ":" + product.Platform
+				testResult := runSingleTest(product.Name, product.Version, pMethod, product.Platform)
+
+				if testResult {
+					testRunToResultMap[test] = "Pass"
+				} else {
+					testRunToResultMap[test] = "Fail"
+				}
+
+				doTestCleanup(product.Name, product.Version)
+				common.Logger.Println()
+			}
+		}
 	}
 
-	if enabled {
-		common.Logger.Println("Running tests for " + product.Name + ", " + product.Version +
-			" using profile " + product.Provisioning_method +
-			", using platform: " + product.Platform)
-
-		common.StopAndRemoveDockerContainer(product.Name)
-		common.CleanDockerImage(product.Name + ":" + product.Version)
-		common.BuildImage(product)
-		common.CheckBuildLogs(product.Name, product.Version)
-		common.RunImage(product)
-		common.CheckRunLogs(product.Name, product.Version)
-		common.CheckExposedPorts(product.Name)
-		common.CheckWso2CarbonServerStatus(product.Name)
-		common.CheckWso2CarbonServerLogs(product.Name, product.Version)
-		
-		// Run smoke tests for this product (if available)
-		smoketests.RunSmokeTest(product.Name)
-		
-		// Do cleanup
-		common.StopAndRemoveDockerContainer(product.Name)
-		common.CleanDockerImage(product.Name + ":" + product.Version)
-
-		// Reset globals for next product test run
-		common.ResetTestSpecificVariables()
-		common.Logger.Println("Test completed for " + product.Name + ", " + product.Version + ". \n\n")		
+	common.Logger.Println("============================  TEST RUN RESULT  ============================================")
+	for test, result := range testRunToResultMap {
+		common.Logger.Println("Test:", test, "Result:", result)
 	}
+	common.Logger.Println("===========================================================================================")
+}
+
+func runSingleTest(name string, version string, pMethod string, platform string) bool {
+	common.Logger.Println("Running tests for " + name + ", " + version +
+		", using " + pMethod + " provisioning" +
+		", under " + platform + " platform.")
+
+	if common.DoesDockerImageExist(name + ":" + version) {
+		common.Logger.Println("There is an existing Docker image for this product. Skipping test!")
+		return false
+	}
+
+	buildResult := common.BuildImage(name, version, pMethod)
+	if buildResult {
+		common.CheckBuildLogs(name, version)
+		if !common.DoesDockerImageExist(name + ":" + version) {
+			common.Logger.Println("Docker build was not successful. Skipping test!")
+			return false
+		}
+	} else {
+		return false
+	}
+
+	runResult := common.RunImage(name, version)
+	if runResult {
+		common.CheckRunLogs(name, version)
+
+		if !common.IsDockerContainerRunning(name) {
+			common.Logger.Println("Docker container is not running. Skipping test")
+			return false
+		}
+	} else {
+		return false
+	}
+
+	result := true
+	result = common.CheckExposedPorts(name) && result
+	result = common.CheckWso2CarbonServerStatus(name) && result
+	result = common.CheckWso2CarbonServerLogs(name, version) && result
+
+	// Run smoke tests for this product (if available)
+	smoketests.RunSmokeTest(name)
+
+	common.Logger.Println("Test completed for " + name + ", " + version + ".")
+	return result
+}
+
+func doTestSetup(name string, version string) {
+	common.Logger.Println("Starting test setup up")
+	common.StopAndRemoveDockerContainer(name)
+	common.CleanDockerImage(name + ":" + version)
+	common.Logger.Println("Completed test setup up")
+}
+
+func doTestCleanup(name string, version string) {
+	common.Logger.Println("Starting test clean up")
+	common.StopAndRemoveDockerContainer(name)
+	common.CleanDockerImage(name + ":" + version)
+	common.Logger.Println("Completed test clean up")
+}
+
+// Function to check all the preconditions that should meet before we can run the tests. Namely:
+// - Docker daemon should be up
+// - Add any preconditions here
+func shouldContinue() bool {
+	if common.IsDockerDaemonRunning() {
+		return true
+	}
+	return false
 }

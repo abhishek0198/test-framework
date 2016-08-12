@@ -21,7 +21,8 @@
 package common
 
 import (
-	"flag"
+	"io/ioutil"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -32,46 +33,45 @@ const (
 	TotalCheckAttempts = 10
 )
 
-func CreateProductConfig() *Product {
-	productName := flag.String("n", "", "product name to test")
-	productVersion := flag.String("v", "", "product version to test")
-	provisioningMethod := flag.String("r", "default", "provisioning method")
-	organization := flag.String("o", "", "Organization name")
-	platform := flag.String("p", "default", "Platform to test under")
-
-	flag.Parse()
-
-	if flag.NFlag() < 2 {
-		flag.Usage()
-		return nil
-	}
-
-	return &Product{"true", *productName, *productVersion, *provisioningMethod, *organization, *platform}
-}
-
-func BuildImage(product Product) {
+func BuildImage(productName string, productVersion string, pMethod string) bool {
 	Logger.Println("Starting building image...")
-	commandPath := Testconfig.DockerfilesHome + "/" + product.Name + "/" + "build.sh"
-	logFileName := product.Name + product.Version + RunLogs
-	args := " -v " + product.Version + " -r " + product.Provisioning_method + " -q > " + logFileName + " 2>&1"
+	commandPath := Testconfig.DockerfilesHome + "/" + productName + "/" + "build.sh"
+	logFileName := productName + productVersion + RunLogs
+	args := " -v " + productVersion + " -r " + pMethod + " -q > " + logFileName + " 2>&1"
 	command := "bash " + commandPath + args
 	_, err := exec.Command("/bin/bash", "-c", command).Output()
 
 	if err == nil {
 		Logger.Println("Successfully built docker image.")
+		return true
+	} else {
+		Logger.Printf("Docker build failure. %s.", err.Error())
+		Logger.Printf("Build command: %s", command)
+		buf, _ := ioutil.ReadFile(logFileName)
+		Logger.Println("BuildLog: " + string(buf))
+		os.Remove(logFileName)
+		return false
 	}
 }
 
-func RunImage(product Product) {
+func RunImage(productName string, productVersion string) bool {
 	Logger.Println("Running image...")
-	commandPath := Testconfig.DockerfilesHome + "/" + product.Name + "/" + "run.sh"
-	logFileName := product.Name + product.Version + RunLogs
-	args := " -v " + product.Version + " > " + logFileName + " 2>&1"
+	commandPath := Testconfig.DockerfilesHome + "/" + productName + "/" + "run.sh"
+	logFileName := productName + productVersion + RunLogs
+	args := " -v " + productVersion + " > " + logFileName + " 2>&1"
 	command := "bash " + commandPath + args
 	_, err := exec.Command("/bin/bash", "-c", "echo 'n n' | "+command).Output()
 
 	if err == nil {
 		Logger.Println("Successfully ran docker image.")
+		return true
+	} else {
+		Logger.Printf("Docker run failed. %s.", err.Error())
+		Logger.Printf("Run command: %s", command)
+		buf, _ := ioutil.ReadFile(logFileName)
+		Logger.Println("RunLog: " + string(buf))
+		os.Remove(logFileName)
+		return false
 	}
 }
 
@@ -101,21 +101,28 @@ func CheckRunLogs(productName string, productVersion string) {
 	}
 }
 
-func CheckExposedPorts(productName string) {
+func CheckExposedPorts(productName string) bool {
 	containerIp := GetDockerContainerIP(productName)
 	productPath := Testconfig.DockerfilesHome + "/" + productName
 	portLine := RunCommandAndGetOutput("grep EXPOSE " + productPath + "/Dockerfile")
 	var ports []string
 	ports = strings.Split(portLine, " ")
 
+	result := true
 	for i := 1; i < len(ports); i++ {
 		port := strings.Replace(ports[i], "\n", "", 2)
-		CheckPortWithTimeout(containerIp, port)
+		result = CheckPortWithTimeout(containerIp, port, i == 1) && result
 	}
+	return result
 }
 
-func CheckPortWithTimeout(containerIp string, port string) bool {
-	for i := 1; i <= TotalCheckAttempts; i++ {
+func CheckPortWithTimeout(containerIp string, port string, applyBackOff bool) bool {
+	attempts := 3
+	if(applyBackOff) {
+		attempts = TotalCheckAttempts
+	}
+	
+	for i := 1; i <= attempts; i++ {
 		portCheckCommand := "nc -z -v -w5 " + containerIp + " " + strings.TrimSpace(port)
 		err := RunCommandAndGetError(portCheckCommand)
 
@@ -134,7 +141,7 @@ func CheckPortWithTimeout(containerIp string, port string) bool {
 	return false
 }
 
-func CheckWso2CarbonServerStatus(productName string) {
+func CheckWso2CarbonServerStatus(productName string) bool {
 	containerIp := GetDockerContainerIP(productName)
 	command := "curl --insecure --write-out %{http_code} --silent --output /dev/null https://" +
 		containerIp + ":" + Testconfig.Carbon_Server_Port +
@@ -144,7 +151,7 @@ func CheckWso2CarbonServerStatus(productName string) {
 		result := RunCommandAndGetOutput(command)
 		if result == "200" {
 			Logger.Println("Carbon server is up and running.")
-			return
+			return true
 		} else {
 			Logger.Println("Attempt: " + strconv.Itoa(i) + "Carbon server is not running.")
 			sleepTime := 2 * i
@@ -152,9 +159,10 @@ func CheckWso2CarbonServerStatus(productName string) {
 			time.Sleep(time.Duration(int32(sleepTime)) * time.Second)
 		}
 	}
+	return false
 }
 
-func CheckWso2CarbonServerLogs(productName string, productVersion string) {
+func CheckWso2CarbonServerLogs(productName string, productVersion string) bool {
 	Logger.Println("Checking Carbon server logs for any errors")
 
 	CopyWSO2CarbonLogs(productName, productVersion)
@@ -164,10 +172,12 @@ func CheckWso2CarbonServerLogs(productName string, productVersion string) {
 	if err == nil {
 		Logger.Println("Errors founds in carbon server logs, please check them under " +
 			productName + productVersion + "logs")
+		return false
 	} else {
 		Logger.Println("Carbon server logs does not contain any errors")
 		command := "rm -rf ./" + productName + productVersion + "logs"
 		RunCommandAndGetError(command)
+		return true
 	}
 }
 
