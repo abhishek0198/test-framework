@@ -97,7 +97,7 @@ func runTests() {
 
 	common.Logger.Println("============================  TEST RUN RESULT  ============================================")
 	for test, result := range testRunToResultMap {
-		common.Logger.Println("Test:", test, "Result:", result)
+		common.Logger.Println("Test:'", test, "', Result:", result)
 	}
 	common.Logger.Println("===========================================================================================")
 }
