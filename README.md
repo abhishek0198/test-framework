@@ -11,7 +11,7 @@ These instuctions are sepecific to Mac OSX, there should be similar counter part
      ` export GOPATH=$HOME/go `  
      ` export PATH=$PATH:$GOPATH/bin ` 
 + Get the project source
-   ` go get -d github.com/abhishek0198/test-framework `
+   ` go get -d github.com/abhishek0198/wsodockerfiles-testframework `
 + Build the project,  
   * cd $GOPATH/src/github.com/abhishek0198/test-framework  
   * go build
