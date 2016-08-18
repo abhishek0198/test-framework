@@ -4,3 +4,5 @@ output.txt
 .project
 /pkg/*
 pkg/*
+*.iml
+.idea/

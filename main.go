@@ -148,10 +148,10 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 }
 
 func doTestSetup(name string, version string) {
-	common.Logger.Println("Starting test setup up")
+	common.Logger.Println("Starting test setup")
 	common.StopAndRemoveDockerContainer(name)
 	common.CleanDockerImage(name + ":" + version)
-	common.Logger.Println("Completed test setup up")
+	common.Logger.Println("Completed test setup")
 }
 
 func doTestCleanup(name string, version string) {

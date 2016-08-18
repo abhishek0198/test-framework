@@ -63,7 +63,7 @@ func RunImage(productName string, productVersion string) bool {
 	_, err := exec.Command("/bin/bash", "-c", "echo 'n n' | "+command).Output()
 
 	if err == nil {
-		Logger.Println("Successfully ran docker image.")
+		Logger.Println("Successfully started the container for " + productName)
 		return true
 	} else {
 		Logger.Printf("Docker run failed. %s.", err.Error())
