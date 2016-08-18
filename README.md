@@ -11,12 +11,12 @@ These instuctions are sepecific to Mac OSX, there should be similar counter part
      ` export GOPATH=$HOME/go `  
      ` export PATH=$PATH:$GOPATH/bin ` 
 + Get the project source
-   ` go get -d github.com/abhishek0198/wsodockerfiles-testframework `
+   ` go get -d github.com/abhishek0198/wso2dockerfiles-test-framework `
 + Build the project,  
   * cd $GOPATH/src/github.com/abhishek0198/test-framework  
   * go build
 + Lauch the test framework using  
-  ` ./wsodockerfiles-testframework `
+  ` ./wso2dockerfiles-test-framework `
 
 ## Running standard tests
 The test framework also requires setting up project relevent to your tests. Following are the projects that you should clone:  
@@ -29,7 +29,7 @@ Once above setup is completed, follow following steps to run the tests:
 1. Edit TestConfigPath under <project_root>/src/common/test-config.json  
 2. Set dockerfileshome and carob_server_port in <project_root>/src/config/test-config.json  
 3. Configure products to test along with desired provisioning in <project_root>/src/config/test-config.json  
-4. Launch test using ```./wsodockerfiles-testframework``` from the same directory  
+4. Launch test using ```./wso2dockerfiles-test-framework``` from the same directory  
 
 ## Mac and Windows users
 Docker does not run directly on Mac OSX and Windows, instead you will need to use docker-machine tool. From Docker's official page:  
