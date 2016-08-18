@@ -31,10 +31,30 @@ Once above setup is completed, follow following steps to run the tests:
 3. Configure products to test along with desired provisioning in <project_root>/src/config/test-config.json  
 4. Launch test using ```./test-framework``` from the same directory  
 
-IMPORTANT: In order to support running on Mac OSX, `carbon_server_ip` is explicity set to use docker-machine's host IP. Remove this config, if you're running on Linux
+## Mac and Windows users
+Docker does not run directly on Mac OSX and Windows, instead you will need to use docker-machine tool. From Docker's official page:  
 
-Here is a sample test config to test WSO2ESB using default and WSO2MB using puppet provisioning.
+"Docker Machine is a tool that lets you install Docker Engine on virtual hosts, and manage the hosts with docker-machine commands. You can use Machine to create Docker hosts on your local Mac or Windows box, on your company network, in your data center, or on cloud providers like AWS or Digital Ocean."
 
+Follow the follwing instructions to setup test framework on Mac or Windows:  
+
+1. Install docker-machine using:  
+https://docs.docker.com/machine/install-machine/  
+
+2. Now, start a docker host  
+`` docker-machine start default ``  
+
+3. The command complets with  
+`` Started machines may have new IP addresses. You may need to re-run the 'docker-machine env' command. ``  
+I have this command added to ~/.bash_profile so that when I start my shell, and docker host is already created, I do not need to run the env command.  
+`` eval $(docker-machine env default) ``  
+
+4. You will need the IP address of this newly created docker host and configure it on the test-config. You can do it using `` docker-machine inspect default `` and get the IPAddress part.  
+
+## Unix/Linux users  
+In order to support running on Mac OSX, `carbon_server_ip` is explicitly set to use docker-machine created host IP. Remove this config, if you're running on Linux
+
+## Sample test config  
 ```        
 {
    "testconfig":{
@@ -78,3 +98,4 @@ Here is a sample test config to test WSO2ESB using default and WSO2MB using pupp
    }
 }
 ```
+The config above is to test WSO2ESB using default and puppet provisioning methods. It also tests WSO2MB using puppet provisioning.
