@@ -24,16 +24,23 @@ import (
 	"github.com/abhishek0198/wso2dockerfiles-test-framework/common"
 )
 
-func RunESBSmokeTests() {
-	common.Logger.Println("Running WSO2ESB Smoke tests")
-	TestProxyServiceCreationAndRemoval()
+func RunESBSmokeTests() bool {
+	common.Logger.Println("INFO Running WSO2ESB Smoke tests")
+	result := true
+
+	result = TestProxyServiceCreationAndRemoval() && result
+
+	return result
 }
 
-func TestProxyServiceCreationAndRemoval() {
+func TestProxyServiceCreationAndRemoval() bool {
 	ip := common.GetDockerContainerIP("esb")
 
-	common.LoginToCarbonServer(ip)
-	common.CreateProxyService("test", "http://test.com", ip)
-	common.DoesProxyServiceExist("test", ip)
-	common.DeleteProxyService("test", ip)
+	result := true
+	result = common.LoginToCarbonServer(ip) && result
+	result = common.CreateProxyService("test", "http://test.com", ip) && result
+	result = common.DoesProxyServiceExist("test", ip) && result
+	result = common.DeleteProxyService("test", ip) && result
+
+	return result
 }

@@ -44,24 +44,24 @@ func main() {
 	}
 
 	totalTime := time.Now().Sub(startTime)
-	common.Logger.Println("Tests completed in " + totalTime.String())
+	common.Logger.Println("INFO Tests completed in " + totalTime.String())
 }
 func setDockerFilesHome() {
-	if(os.Getenv("DOCKERFILES_HOME") == "") {
-		panic("DOCKERFILES_HOME is not set. Please set the environment variable before running test")
+	if (os.Getenv("DOCKERFILES_HOME") == "") {
+		panic("ERROR DOCKERFILES_HOME is not set. Please set the environment variable before running test")
 	}
 	common.DockerfilesHome = os.Getenv("DOCKERFILES_HOME")
 }
 
 func initializeLogging() *os.File {
-	f, err := os.OpenFile(common.Testconfig.Output_file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile(common.Testconfig.Output_file, os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Printf("Error in opening file %v", err)
+		fmt.Errorf("ERROR Error in opening file %v", err)
 	}
 
 	log.SetOutput(f)
-	common.Logger = log.New(io.MultiWriter(f, os.Stdout), "", log.Lshortfile|log.LstdFlags)
-	common.Logger.Println("Logging initialized")
+	common.Logger = log.New(io.MultiWriter(f, os.Stdout), "", log.Lshortfile | log.LstdFlags)
+	common.Logger.Println("INFO Logging initialized")
 	return f
 }
 
@@ -75,7 +75,7 @@ func runTests() {
 		enabled, err := strconv.ParseBool(product.Enabled)
 
 		if err != nil {
-			panic("Could not parse the 'Enabled' field of test config for test - " + product.Name + ":" + product.Version)
+			panic("ERROR Could not parse the 'Enabled' field of test config for test - " + product.Name + ":" + product.Version)
 			continue
 		}
 
@@ -103,18 +103,22 @@ func runTests() {
 
 	common.Logger.Println("============================  TEST RUN RESULT  ============================================")
 	for test, result := range testRunToResultMap {
-		common.Logger.Println("Test:'", test, "', Result:", result)
+		if result == "Pass" {
+			common.Logger.Println("INFO Test:'", test, "', Result:", result)
+		} else {
+			common.Logger.Println(common.GetRedColorFormattedOutputString("INFO Test:'" + test + "', Result:" + result))
+		}
 	}
 	common.Logger.Println("===========================================================================================")
 }
 
 func runSingleTest(name string, version string, pMethod string, platform string) bool {
-	common.Logger.Println("Running tests for " + name + ", " + version +
+	common.Logger.Println("INFO Running tests for " + name + ", " + version +
 		", using " + pMethod + " provisioning" +
 		", under " + platform + " platform.")
 
 	if common.DoesDockerImageExist(name + ":" + version) {
-		common.Logger.Println("There is an existing Docker image for this product. Skipping test!")
+		common.Logger.Println("WARN There is an existing Docker image for this product. Skipping test!")
 		return false
 	}
 
@@ -122,7 +126,7 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 	if buildResult {
 		common.CheckBuildLogs(name, version)
 		if !common.DoesDockerImageExist(name + ":" + version) {
-			common.Logger.Println("Docker build was not successful. Skipping test!")
+			common.Logger.Println("WARN Docker build was not successful. Skipping test!")
 			return false
 		}
 	} else {
@@ -134,7 +138,7 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 		common.CheckRunLogs(name, version)
 
 		if !common.IsDockerContainerRunning(name) {
-			common.Logger.Println("Docker container is not running. Skipping test")
+			common.Logger.Println("WARN Docker container is not running. Skipping test")
 			return false
 		}
 	} else {
@@ -149,22 +153,22 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 	// Run smoke tests for this product (if available)
 	smoketests.RunSmokeTest(name)
 
-	common.Logger.Println("Test completed for " + name + ", " + version + ".")
+	common.Logger.Println("INFO Test completed for " + name + ", " + version + ".")
 	return result
 }
 
 func doTestSetup(name string, version string) {
-	common.Logger.Println("Starting test setup")
+	common.Logger.Println("INFO Starting test setup")
 	common.StopAndRemoveDockerContainer(name)
 	common.CleanDockerImage(name + ":" + version)
-	common.Logger.Println("Completed test setup")
+	common.Logger.Println("INFO Completed test setup")
 }
 
 func doTestCleanup(name string, version string) {
-	common.Logger.Println("Starting test clean up")
+	common.Logger.Println("INFO Starting test clean up")
 	common.StopAndRemoveDockerContainer(name)
 	common.CleanDockerImage(name + ":" + version)
-	common.Logger.Println("Completed test clean up")
+	common.Logger.Println("INFO Completed test clean up")
 }
 
 // Function to check all the preconditions that should meet before we can run the tests. Namely:

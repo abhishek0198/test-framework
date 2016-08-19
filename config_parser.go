@@ -34,16 +34,16 @@ type jsontype struct {
 func parseTestConfig() {
 	file, err := ioutil.ReadFile(common.TestConfigPath)
 	if err != nil {
-		panic("Unable to read test config file." + err.Error())
+		panic(common.GetRedColorFormattedOutputString("ERROR Unable to read test config file. Error: " + err.Error()))
 	}
 
-	log.Println("Parsing test configuration")
+	log.Println("INFO Parsing test configuration")
 
 	var configObject jsontype
 	err = json.Unmarshal(file, &configObject)
 
 	if err != nil {
-		panic("Could not parse test config json, please check if its correct.")
+		panic(common.GetRedColorFormattedOutputString("ERROR Could not parse test config json, please check if its correct. Error: " + err.Error()))
 	}
 
 	common.Testconfig = configObject.Testconfig

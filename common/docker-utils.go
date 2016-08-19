@@ -31,7 +31,7 @@ func IsDockerDaemonRunning() bool {
 	_, err := exec.Command("/bin/bash", "-c", command).Output()
 
 	if err != nil {
-		Logger.Println("Docker daemon is not running. Exiting test framework")
+		Logger.Println(GetRedColorFormattedOutputString("ERROR Docker daemon is not running. Exiting test framework. Error: " + err.Error()))
 		return false
 	}
 	return true
@@ -40,11 +40,11 @@ func IsDockerDaemonRunning() bool {
 // Function to clean docker image by its tag
 func CleanDockerImage(tag string) {
 	if DoesDockerImageExist(tag) {
-		Logger.Println("Removing docker image " + tag)
+		Logger.Println("INFO Removing docker image '" + tag + "'")
 		_, err := exec.Command("/bin/bash", "-c", "docker rmi "+tag).Output()
 
 		if err == nil {
-			Logger.Println("Successfully removed docker image")
+			Logger.Println("INFO Successfully removed docker image")
 		}
 	}
 }
@@ -55,16 +55,15 @@ func StopAndRemoveDockerContainer(productName string) {
 	out, err := exec.Command("/bin/bash", "-c", command).Output()
 
 	if err != nil {
-		Logger.Println("Error in getting docker container id")
-		Logger.Printf("%s\n", err)
+		Logger.Println(GetRedColorFormattedOutputString("ERROR Error in getting docker container id. Error: " + err.Error()))
 	} else if string(out) != "" {
-		Logger.Printf("Stopping and removing docker container with id: %s", out)
+		Logger.Printf("INFO Stopping and removing docker container with id: %s", out)
 
 		_, err1 := exec.Command("/bin/bash", "-c", "docker stop "+string(out)).Output()
 		_, err2 := exec.Command("/bin/bash", "-c", "docker rm "+string(out)).Output()
 
 		if err1 == nil && err2 == nil {
-			Logger.Println("Successfully stopped and removed docker container")
+			Logger.Println("INFO Successfully stopped and removed docker container.")
 		}
 	}
 }
@@ -100,9 +99,9 @@ func CopyWSO2CarbonLogs(productName string, productVersion string) {
 		productVersion + "/repository/logs/ ./" + productName + productVersion + "logs"
 	err := RunCommandAndGetError(command)
 	if err != nil {
-		Logger.Fatal("Unable to copy carbon server logs from docker container. Command: " + command + ". Error:" + err.Error())
+		Logger.Fatal(GetRedColorFormattedOutputString("WARN Unable to copy carbon server logs from docker container. Command: " + command + ". Error:" + err.Error()))
 	} else {
-		Logger.Println("Successfully copied carbon server logs from docker container")
+		Logger.Println("INFO Successfully copied carbon server logs from docker container")
 	}
 }
 
@@ -111,8 +110,8 @@ func GetDockerContainerID(productName string) string {
 	command := "docker ps | grep " + productName + " | awk '{print $1}'"
 	out, err := exec.Command("/bin/bash", "-c", command).Output()
 	if err != nil {
-		message := "Error in getting Docker container id. Command: " + command + ". Error: " + err.Error()
-		Logger.Println(message)
+		message := "ERROR Error in getting Docker container id. Command: " + command + ". Error: " + err.Error()
+		Logger.Println(GetRedColorFormattedOutputString(message))
 		panic(message)
 	}
 
@@ -135,8 +134,8 @@ func GetDockerContainerIPUsingID(id string) string {
 	command := "docker inspect --format '{{ .NetworkSettings.IPAddress }}' " + id
 	out, err := exec.Command("/bin/bash", "-c", command).Output()
 	if err != nil {
-		message := "Error in getting docker container IP. Command: " + command + ", Error: " + err.Error()
-		Logger.Println(message)
+		message := "ERROR Error in getting docker container IP. Command: " + command + ", Error: " + err.Error()
+		Logger.Println(GetRedColorFormattedOutputString(message))
 		panic(message)
 	}
 	return strings.Replace(string(out), "\n", "", 1)
