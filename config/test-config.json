@@ -2,21 +2,21 @@
    "testconfig":{
       "wso2_products":[
          {
-            "enabled":"True",
+            "enabled":"true",
             "name":"wso2esb",
             "version":"4.9.0",
             "provisioning_method":["default"],
             "platform":"default"
          },
          {
-            "enabled":"False",
+            "enabled":"false",
             "name":"wso2mb",
             "version":"3.1.0",
             "provisioning_method":["puppet"],
             "platform":"default"
          },
          {
-            "enabled":"False",
+            "enabled":"false",
             "name":"wso2esb",
             "version":"4.9.0",
             "provisioning_method":["puppet"],
@@ -24,7 +24,7 @@
             "profile":["worker", "manager"]
          },
          {
-            "enabled":"False",
+            "enabled":"false",
             "name":"wso2am",
             "version":"2.0.0",
             "provisioning_method":["default"],

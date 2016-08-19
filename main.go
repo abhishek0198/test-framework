@@ -36,8 +36,6 @@ func main() {
 
 	parseTestConfig()
 	setDockerFilesHome()
-	
-
 	f := initializeLogging()
 	defer f.Close()
 
