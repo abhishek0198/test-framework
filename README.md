@@ -41,15 +41,18 @@ Follow the follwing instructions to setup test framework on Mac or Windows:
 1. Install docker-machine using:  
 https://docs.docker.com/machine/install-machine/  
 
-2. Now, start a docker host  
+2. Create default docker host  
+`` docker-machine create --driver virtualbox default ``  
+
+3. Now, start a docker host  
 `` docker-machine start default ``  
 
-3. The command complets with  
+4. The command complets with  
 `` Started machines may have new IP addresses. You may need to re-run the 'docker-machine env' command. ``  
 I have this command added to ~/.bash_profile so that when I start my shell, and docker host is already created, I do not need to run the env command.  
 `` eval $(docker-machine env default) ``  
 
-4. You will need the IP address of this newly created docker host and configure it on the test-config. You can do it using `` docker-machine inspect default `` and get the IPAddress part.  
+5. You will need the IP address of this newly created docker host and configure it on the test-config. You can do it using `` docker-machine inspect default `` and get the IPAddress part.  
 
 ## Unix/Linux users  
 In order to support running on Mac OSX, `carbon_server_ip` is explicitly set to use docker-machine created host IP. Remove this config, if you're running on Linux
