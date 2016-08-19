@@ -177,7 +177,7 @@ func CheckWso2CarbonServerLogs(productName string, productVersion string) bool {
 	Logger.Println("INFO Checking Carbon server logs for any errors")
 
 	CopyWSO2CarbonLogs(productName, productVersion)
-	command := "grep -ir 'error' ./" + productName + productVersion + "logs"
+	command := "grep -r ' ERROR ' ./" + productName + productVersion + "logs"
 	err := RunCommandAndGetError(command)
 
 	if err == nil {
