@@ -60,21 +60,21 @@ In order to support running on Mac OSX, `carbon_server_ip` is explicitly set to 
    "testconfig":{
       "wso2_products":[
          {
-            "enabled":"True",
+            "enabled":"true",
             "name":"wso2esb",
             "version":"4.9.0",
             "provisioning_method":["default","puppet"],
             "platform":"default"
          },
          {
-            "enabled":"True",
+            "enabled":"true",
             "name":"wso2mb",
             "version":"3.1.0",
             "provisioning_method":["puppet"],
             "platform":"default"
          },
          {
-            "enabled":"False",
+            "enabled":"false",
             "name":"wso2esb",
             "version":"4.9.0",
             "provisioning_method":["puppet"],
@@ -82,7 +82,7 @@ In order to support running on Mac OSX, `carbon_server_ip` is explicitly set to 
             "profile":["worker", "manager"]
          },
          {
-            "enabled":"False",
+            "enabled":"false",
             "name":"wso2am",
             "version":"2.0.0",
             "provisioning_method":["default"],
