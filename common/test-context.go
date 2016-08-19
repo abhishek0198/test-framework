@@ -51,4 +51,5 @@ type TestConfig struct {
 	Carbon_Server_Port     string
 	Carbon_Server_Username string
 	Carbon_Server_Password string
+	Silent_Build_Output    string
 }

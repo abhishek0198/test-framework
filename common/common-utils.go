@@ -37,7 +37,8 @@ func BuildImage(productName string, productVersion string, pMethod string) bool 
 	Logger.Println("Starting building docker image for '" + productName + ":" + productVersion + "' ...")
 	commandPath := DockerfilesHome + "/" + productName + "/" + "build.sh"
 	logFileName := productName + productVersion + RunLogs
-	args := " -v " + productVersion + " -r " + pMethod + " -q > " + logFileName + " 2>&1"
+
+	args := " -v " + productVersion + " -r " + pMethod + getSilentOutputArgument() + " > " + logFileName + " 2>&1"
 	command := "bash " + commandPath + args
 	_, err := exec.Command("/bin/bash", "-c", command).Output()
 
@@ -207,4 +208,17 @@ func RunCommandAndGetError(command string) error {
 
 func GetRedColorFormattedOutputString(msg string) string {
 	return "\x1b[31;1m" + msg + "\x1b[0m"
+}
+
+func getSilentOutputArgument() string {
+	silentOutput, er  := strconv.ParseBool(Testconfig.Silent_Build_Output)
+	if er != nil {
+		silentOutput = false
+	}
+
+	silentOutputArg := ""
+	if silentOutput {
+		silentOutputArg = " -q"
+	}
+	return silentOutputArg
 }
