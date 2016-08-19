@@ -22,8 +22,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/abhishek0198/test-framework/common"
-	"github.com/abhishek0198/test-framework/smoketests"
+	"github.com/abhishek0198/wso2dockerfiles-test-framework/common"
+	"github.com/abhishek0198/wso2dockerfiles-test-framework/smoketests"
 	"io"
 	"log"
 	"os"
@@ -34,7 +34,9 @@ import (
 func main() {
 	startTime := time.Now()
 
-	ParseTestConfig()
+	parseTestConfig()
+	setDockerFilesHome()
+	
 
 	f := initializeLogging()
 	defer f.Close()
@@ -45,6 +47,12 @@ func main() {
 
 	totalTime := time.Now().Sub(startTime)
 	common.Logger.Println("Tests completed in " + totalTime.String())
+}
+func setDockerFilesHome() {
+	if(os.Getenv("DOCKERFILES_HOME") == "") {
+		panic("DOCKERFILES_HOME is not set. Please set the environment variable before running test")
+	}
+	common.DockerfilesHome = os.Getenv("DOCKERFILES_HOME")
 }
 
 func initializeLogging() *os.File {

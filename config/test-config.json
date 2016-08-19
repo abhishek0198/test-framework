@@ -5,11 +5,11 @@
             "enabled":"True",
             "name":"wso2esb",
             "version":"4.9.0",
-            "provisioning_method":["default","puppet"],
+            "provisioning_method":["default"],
             "platform":"default"
          },
          {
-            "enabled":"True",
+            "enabled":"False",
             "name":"wso2mb",
             "version":"3.1.0",
             "provisioning_method":["puppet"],
@@ -32,8 +32,7 @@
          }
       ],
       "output_file":"dockerfiles-test-result.txt",
-      "dockerfileshome":"/Users/abhishektiwari/dev/dockerfiles",
-      "carbon_server_ip":"192.168.99.100",
+      "docker_container_ip":"192.168.99.100",
       "carbon_server_port":"9443",
       "carbon_server_username":"admin",
       "carbon_server_password":"admin"

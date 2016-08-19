@@ -23,14 +23,15 @@ package common
 import "log"
 
 const (
-	BuildLogs      = "buildlogs.log"
-	RunLogs        = "runlogs.log"
+	BuildLogs = "buildlogs.log"
+	RunLogs = "runlogs.log"
 	TestConfigPath = "config/test-config.json"
 )
 
 var (
 	Testconfig TestConfig
 	Logger     *log.Logger
+	DockerfilesHome string
 )
 
 type Product struct {
@@ -40,14 +41,13 @@ type Product struct {
 	Provisioning_method []string
 	Organization        string
 	Platform            string
-	Profile               []string
+	Profile             []string
 }
 
 type TestConfig struct {
 	Wso2_products          []Product
 	Output_file            string
-	DockerfilesHome        string
-	Carbon_Server_Ip       string
+	Docker_Container_Ip    string
 	Carbon_Server_Port     string
 	Carbon_Server_Username string
 	Carbon_Server_Password string

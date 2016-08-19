@@ -34,8 +34,8 @@ const (
 )
 
 func BuildImage(productName string, productVersion string, pMethod string) bool {
-	Logger.Println("Starting building image...")
-	commandPath := Testconfig.DockerfilesHome + "/" + productName + "/" + "build.sh"
+	Logger.Println("Starting building docker image for " + productName + ":" + productVersion + "...")
+	commandPath := DockerfilesHome + "/" + productName + "/" + "build.sh"
 	logFileName := productName + productVersion + RunLogs
 	args := " -v " + productVersion + " -r " + pMethod + " -q > " + logFileName + " 2>&1"
 	command := "bash " + commandPath + args
@@ -55,8 +55,8 @@ func BuildImage(productName string, productVersion string, pMethod string) bool 
 }
 
 func RunImage(productName string, productVersion string) bool {
-	Logger.Println("Running image...")
-	commandPath := Testconfig.DockerfilesHome + "/" + productName + "/" + "run.sh"
+	Logger.Println("Running docker image for " + productName + ":" + productVersion + "...")
+	commandPath := DockerfilesHome + "/" + productName + "/" + "run.sh"
 	logFileName := productName + productVersion + RunLogs
 	args := " -v " + productVersion + " > " + logFileName + " 2>&1"
 	command := "bash " + commandPath + args
@@ -103,7 +103,7 @@ func CheckRunLogs(productName string, productVersion string) {
 
 func CheckExposedPorts(productName string) bool {
 	containerIp := GetDockerContainerIP(productName)
-	productPath := Testconfig.DockerfilesHome + "/" + productName
+	productPath := DockerfilesHome + "/" + productName
 	portLine := RunCommandAndGetOutput("grep EXPOSE " + productPath + "/Dockerfile")
 	var ports []string
 	ports = strings.Split(portLine, " ")

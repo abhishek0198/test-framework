@@ -121,8 +121,8 @@ func GetDockerContainerID(productName string) string {
 
 // Function to get docker container IP addrses
 func GetDockerContainerIP(productName string) string {
-	if Testconfig.Carbon_Server_Ip != "" {
-		return Testconfig.Carbon_Server_Ip
+	if Testconfig.Docker_Container_Ip != "" {
+		return Testconfig.Docker_Container_Ip
 	} else {
 		containerId := GetDockerContainerID(productName)
 		containerIp := GetDockerContainerIPUsingID(containerId)

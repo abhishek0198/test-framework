@@ -21,7 +21,7 @@
 package smoketests
 
 import (
-	"github.com/abhishek0198/test-framework/common"
+	"github.com/abhishek0198/wso2dockerfiles-test-framework/common"
 )
 
 func RunESBSmokeTests() {

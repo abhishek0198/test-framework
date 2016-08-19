@@ -22,7 +22,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/abhishek0198/test-framework/common"
+	"github.com/abhishek0198/wso2dockerfiles-test-framework/common"
 	"io/ioutil"
 	"log"
 )
@@ -31,7 +31,7 @@ type jsontype struct {
 	Testconfig common.TestConfig
 }
 
-func ParseTestConfig() {
+func parseTestConfig() {
 	file, err := ioutil.ReadFile(common.TestConfigPath)
 	if err != nil {
 		panic("Unable to read test config file." + err.Error())
