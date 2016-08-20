@@ -6,3 +6,4 @@ output.txt
 pkg/*
 *.iml
 .idea/
+./wso2dockerfiles-test-framework

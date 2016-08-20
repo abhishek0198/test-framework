@@ -1,0 +1,41 @@
+{
+   "testconfig":{
+      "wso2_products":[
+         {
+            "enabled":"true",
+            "name":"wso2esb",
+            "version":"4.9.0",
+            "provisioning_method":["puppet"],
+            "platform":"default"
+         },
+         {
+            "enabled":"false",
+            "name":"wso2mb",
+            "version":"3.1.0",
+            "provisioning_method":["puppet"],
+            "platform":"default"
+         },
+         {
+            "enabled":"false",
+            "name":"wso2esb",
+            "version":"4.9.0",
+            "provisioning_method":["puppet"],
+            "platform":"kubernetes",
+            "profile":["worker", "manager"]
+         },
+         {
+            "enabled":"false",
+            "name":"wso2am",
+            "version":"2.0.0",
+            "provisioning_method":["default"],
+            "platform":"default"
+         }
+      ],
+      "output_file":"dockerfiles-test-result.txt",
+      "docker_container_ip":"192.168.99.101",
+      "carbon_server_port":"9443",
+      "carbon_server_username":"admin",
+      "carbon_server_password":"admin",
+      "silent_build_output" : "false"
+   }
+}

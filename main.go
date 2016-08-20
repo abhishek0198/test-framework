@@ -46,6 +46,7 @@ func main() {
 	totalTime := time.Now().Sub(startTime)
 	common.Logger.Println("INFO Tests completed in " + totalTime.String())
 }
+
 func setDockerFilesHome() {
 	if (os.Getenv("DOCKERFILES_HOME") == "") {
 		panic("ERROR DOCKERFILES_HOME is not set. Please set the environment variable before running test")
