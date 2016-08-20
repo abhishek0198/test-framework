@@ -31,6 +31,10 @@ import (
 	"time"
 )
 
+const (
+	DOCKERFILES_HOME = "DOCKERFILES_HOME"
+)
+
 func main() {
 	startTime := time.Now()
 
@@ -48,16 +52,17 @@ func main() {
 }
 
 func setDockerFilesHome() {
-	if (os.Getenv("DOCKERFILES_HOME") == "") {
-		panic("ERROR DOCKERFILES_HOME is not set. Please set the environment variable before running test")
+	if (os.Getenv(DOCKERFILES_HOME) == "") {
+		fmt.Println("ERROR DOCKERFILES_HOME is not set. Please set the environment variable before running test")
+		os.Exit(1)
 	}
-	common.DockerfilesHome = os.Getenv("DOCKERFILES_HOME")
+	common.DockerfilesHome = os.Getenv(DOCKERFILES_HOME)
 }
 
 func initializeLogging() *os.File {
 	f, err := os.OpenFile(common.Testconfig.Output_file, os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Errorf("ERROR Error in opening file %v", err)
+		fmt.Printf("ERROR Error in opening file %v \n", err)
 	}
 
 	log.SetOutput(f)
@@ -70,13 +75,13 @@ func runTests() {
 	var ProductsToTest []common.Product
 	testRunToResultMap := make(map[string]string)
 
-	ProductsToTest = common.Testconfig.Wso2_products
+	ProductsToTest = common.Testconfig.Products
 
 	for _, product := range ProductsToTest {
 		enabled, err := strconv.ParseBool(product.Enabled)
 
 		if err != nil {
-			panic("ERROR Could not parse the 'Enabled' field of test config for test - " + product.Name + ":" + product.Version)
+			log.Println("ERROR Could not parse the 'enabled' field of test config for test - " + product.Name + ":" + product.Version)
 			continue
 		}
 
@@ -160,16 +165,19 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 
 func doTestSetup(name string, version string) {
 	common.Logger.Println("INFO Starting test setup")
-	common.StopAndRemoveDockerContainer(name)
-	common.CleanDockerImage(name + ":" + version)
+	cleanExistingDockerImage(name, version)
 	common.Logger.Println("INFO Completed test setup")
 }
 
 func doTestCleanup(name string, version string) {
 	common.Logger.Println("INFO Starting test clean up")
+	cleanExistingDockerImage(name, version)
+	common.Logger.Println("INFO Completed test clean up")
+}
+
+func cleanExistingDockerImage(name string, version string) {
 	common.StopAndRemoveDockerContainer(name)
 	common.CleanDockerImage(name + ":" + version)
-	common.Logger.Println("INFO Completed test clean up")
 }
 
 // Function to check all the preconditions that should meet before we can run the tests. Namely:

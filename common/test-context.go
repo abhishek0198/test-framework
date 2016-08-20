@@ -45,7 +45,7 @@ type Product struct {
 }
 
 type TestConfig struct {
-	Wso2_products          []Product
+	Products               []Product
 	Output_file            string
 	Docker_Container_Ip    string
 	Carbon_Server_Port     string

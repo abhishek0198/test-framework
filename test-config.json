@@ -1,6 +1,6 @@
 {
    "testconfig":{
-      "wso2_products":[
+      "products":[
          {
             "enabled":"true",
             "name":"wso2esb",
