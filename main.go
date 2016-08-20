@@ -29,10 +29,13 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"strings"
 )
 
 const (
 	DOCKERFILES_HOME = "DOCKERFILES_HOME"
+	PUPPET_HOME = "PUPPET_HOME"
+	PUPPET_PROVISIONING = "puppet"
 )
 
 func main() {
@@ -123,6 +126,12 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 		", using " + pMethod + " provisioning" +
 		", under " + platform + " platform.")
 
+	if strings.Compare(pMethod, PUPPET_PROVISIONING) == 0 {
+		if !isPuppetHomeDefined() {
+			return false
+		}
+	}
+
 	if common.DoesDockerImageExist(name + ":" + version) {
 		common.Logger.Println("WARN There is an existing Docker image for this product. Skipping test!")
 		return false
@@ -188,4 +197,12 @@ func shouldContinue() bool {
 		return true
 	}
 	return false
+}
+
+func isPuppetHomeDefined() bool {
+	if (os.Getenv(PUPPET_HOME) == "") {
+		fmt.Println("ERROR PUPPET_HOME is not set. Please set the environment variable before running test")
+		return false
+	}
+	return true
 }
