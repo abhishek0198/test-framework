@@ -6,7 +6,8 @@
             "name":"wso2esb",
             "version":"4.9.0",
             "provisioning_method":["puppet"],
-            "platform":"default"
+            "platform":"default",
+            "smoke_test_path":"./smoketests/esb/esb"
          },
          {
             "enabled":"false",
@@ -32,7 +33,7 @@
          }
       ],
       "output_file":"dockerfiles-test-result.txt",
-      "docker_container_ip":"192.168.99.101",
+      "docker_container_ip":"192.168.99.100",
       "carbon_server_port":"9443",
       "carbon_server_username":"admin",
       "carbon_server_password":"admin",

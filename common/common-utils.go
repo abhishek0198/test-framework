@@ -37,7 +37,6 @@ func BuildImage(productName string, productVersion string, pMethod string) bool 
 	Logger.Println("Starting building docker image for '" + productName + ":" + productVersion + "' ...")
 	commandPath := DockerfilesHome + "/" + productName + "/" + "build.sh"
 	logFileName := productName + productVersion + RunLogs
-
 	args := " -v " + productVersion + " -r " + pMethod + getSilentOutputArgument() + " > " + logFileName + " 2>&1"
 	command := "bash " + commandPath + args
 	_, err := exec.Command("/bin/bash", "-c", command).Output()
@@ -144,7 +143,7 @@ func CheckPortWithTimeout(containerIp string, port string, applyBackOff bool) bo
 	return false
 }
 
-func CheckWso2CarbonServerStatus(productName string) bool {
+func CheckWso2CarbonServerStatus() bool {
 	client, err := GetHttpClient()
 	if err != nil {
 		return false

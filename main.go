@@ -23,12 +23,12 @@ package main
 import (
 	"fmt"
 	"github.com/abhishek0198/wso2dockerfiles-test-framework/common"
-	"github.com/abhishek0198/wso2dockerfiles-test-framework/smoketests"
 	"io"
 	"log"
 	"os"
 	"strconv"
 	"time"
+	"os/exec"
 	"strings"
 )
 
@@ -96,7 +96,7 @@ func runTests() {
 				doTestSetup(product.Name, product.Version)
 
 				test := product.Name + ":" + product.Version + ":" + pMethod + ":" + product.Platform
-				testResult := runSingleTest(product.Name, product.Version, pMethod, product.Platform)
+				testResult := runSingleTest(product, pMethod)
 
 				if testResult {
 					testRunToResultMap[test] = "Pass"
@@ -121,10 +121,10 @@ func runTests() {
 	common.Logger.Println("===========================================================================================")
 }
 
-func runSingleTest(name string, version string, pMethod string, platform string) bool {
-	common.Logger.Println("INFO Running tests for " + name + ", " + version +
+func runSingleTest(product common.Product, pMethod string) bool {
+	common.Logger.Println("INFO Running tests for " + product.Name + ", " + product.Version +
 		", using " + pMethod + " provisioning" +
-		", under " + platform + " platform.")
+		", under " + product.Platform + " platform.")
 
 	if strings.Compare(pMethod, PUPPET_PROVISIONING) == 0 {
 		if !isPuppetHomeDefined() {
@@ -132,15 +132,15 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 		}
 	}
 
-	if common.DoesDockerImageExist(name + ":" + version) {
+	if common.DoesDockerImageExist(product.Name + ":" + product.Version) {
 		common.Logger.Println("WARN There is an existing Docker image for this product. Skipping test!")
 		return false
 	}
 
-	buildResult := common.BuildImage(name, version, pMethod)
+	buildResult := common.BuildImage(product.Name, product.Version, pMethod)
 	if buildResult {
-		common.CheckBuildLogs(name, version)
-		if !common.DoesDockerImageExist(name + ":" + version) {
+		common.CheckBuildLogs(product.Name, product.Version)
+		if !common.DoesDockerImageExist(product.Name + ":" + product.Version) {
 			common.Logger.Println("WARN Docker build was not successful. Skipping test!")
 			return false
 		}
@@ -148,11 +148,11 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 		return false
 	}
 
-	runResult := common.RunImage(name, version)
+	runResult := common.RunImage(product.Name, product.Version)
 	if runResult {
-		common.CheckRunLogs(name, version)
+		common.CheckRunLogs(product.Name, product.Version)
 
-		if !common.IsDockerContainerRunning(name) {
+		if !common.IsDockerContainerRunning(product.Name) {
 			common.Logger.Println("WARN Docker container is not running. Skipping test")
 			return false
 		}
@@ -161,15 +161,39 @@ func runSingleTest(name string, version string, pMethod string, platform string)
 	}
 
 	result := true
-	result = common.CheckExposedPorts(name) && result
-	result = common.CheckWso2CarbonServerStatus(name) && result
-	result = common.CheckWso2CarbonServerLogs(name, version) && result
+	result = common.CheckExposedPorts(product.Name) && result
+	result = common.CheckWso2CarbonServerStatus() && result
+	result = common.CheckWso2CarbonServerLogs(product.Name, product.Version) && result
 
 	// Run smoke tests for this product (if available)
-	smoketests.RunSmokeTest(name)
+	if product.Smoke_Test_Path!= "" {
+		result =  runSmokeTest(product) && result
+	}
 
-	common.Logger.Println("INFO Test completed for " + name + ", " + version + ".")
+	common.Logger.Println("INFO Test completed for " + product.Name + ", " + product.Version + ".")
 	return result
+}
+
+func runSmokeTest(product common.Product) bool {
+	common.Logger.Println("INFO Lunching smoke test for " + product.Name + " using " + product.Smoke_Test_Path)
+	command := product.Smoke_Test_Path + " -ip " + common.GetDockerContainerIP(product.Name) + " -port " + common.Testconfig.Carbon_Server_Port + " -user " + common.Testconfig.Carbon_Server_Username + " -pass " + common.Testconfig.Carbon_Server_Password
+
+	runResult := exec.Command("/bin/bash", "-c", command)
+
+	_, err := runResult.Output()
+	if err != nil {
+		common.Logger.Println("ERROR Error in running smoke tests for " + product.Name + ". Error: " + err.Error())
+		return false
+	}
+	out := ""
+	r := runResult.ProcessState.Success()
+	if r {
+		out = "Successful"
+	} else {
+		out = "Failed"
+	}
+	common.Logger.Println("INFO Smoke test result for " + product.Name + ": " + out)
+	return r
 }
 
 func doTestSetup(name string, version string) {

@@ -23,17 +23,8 @@ package common
 import (
 	"crypto/tls"
 	"golang.org/x/net/publicsuffix"
-	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
-	"net/url"
-	"strings"
-)
-
-const (
-	LoginURL       = "/carbon/admin/login_action.jsp"
-	CreateProxyURL = "/carbon/proxyservices/template_pass-through.jsp"
-	DeleteProxyURL = "/carbon/service-mgt/delete_service_groups.jsp"
 )
 
 var (
@@ -68,101 +59,6 @@ func GetHttpClient() (http.Client, error) {
 
 	}
 	return HttpClient, nil
-}
-
-// Function to login to wso2 carbon server using default credentials
-func LoginToCarbonServer(ip string) bool {
-	client, err := GetHttpClient()
-	if err != nil {
-		return false
-	}
-	carbonLoginUrl := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + LoginURL
-	resp, err := client.PostForm(carbonLoginUrl, url.Values{
-		"password": {Testconfig.Carbon_Server_Username},
-		"username": {Testconfig.Carbon_Server_Password},
-	})
-	if(!errorExists(err)) {
-		defer resp.Body.Close()
-
-		htmlcontent, err := ioutil.ReadAll(resp.Body)
-		errorExists(err)
-
-		data := string(htmlcontent)
-		if resp.StatusCode == http.StatusOK && strings.Contains(data, "Signed-in as:") {
-			Logger.Println("INFO WSO2 admin user Logged in")
-			return true
-		} else {
-			Logger.Println("WARN WSO2 admin user could not login")
-		}
-	}
-	return false
-}
-
-// Function to test if a proxy service exists in wso2 esb
-func DoesProxyServiceExist(serviceName string, ip string) bool {
-	client, err := GetHttpClient()
-	if err != nil {
-		return false
-	}
-
-	url := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + "/services/" + serviceName + "?tryit"
-	resp, err := client.Get(url)
-
-	if errorExists(err) {
-		return false
-	}
-
-	defer resp.Body.Close()
-
-	if resp != nil {
-		if resp.StatusCode == http.StatusOK {
-			Logger.Printf("INFO Proxy service '" + serviceName + "' exists. Response code: %d\n", resp.StatusCode)
-			return true
-		} else {
-			Logger.Printf("WARN Proxy service '" + serviceName + "' does not exists. Response code: %d\n", resp.StatusCode)
-		}
-		resp.Body.Close()
-	}
-	return false
-}
-
-// Function to create a new proxy service in wso2 esb
-func CreateProxyService(proxyName string, targetURL string, ip string) bool {
-	client, err := GetHttpClient()
-	if err != nil {
-		return false
-	}
-
-	args := "?formSubmitted=true&proxyName=" + proxyName + "&targetEndpointMode=url&targetURL=" + targetURL + "&publishWsdlCombo=None&availableTransportsList=https,http,local&trp__https=https&trp__http=http"
-	createServiceUrl := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + CreateProxyURL + args
-	resp, err := client.Get(createServiceUrl)
-
-	if errorExists(err) {
-		return false
-	}
-	defer resp.Body.Close()
-	Logger.Printf("INFO Proxy service creation for service '" + proxyName + "' completed. Response code: %d\n", resp.StatusCode)
-	return resp.StatusCode == http.StatusOK
-}
-
-// Function to delete an existing proxy service in wso2 esb
-func DeleteProxyService(proxyName string, ip string) bool {
-	client, err := GetHttpClient()
-	if err != nil {
-		return false
-	}
-
-	args := "?pageNumber=0&serviceGroups=" + proxyName
-	deleteServiceUrl := "https://" + ip + ":" + Testconfig.Carbon_Server_Port + DeleteProxyURL + args
-	resp, err := client.Get(deleteServiceUrl)
-
-	if errorExists(err) {
-		return false
-	}
-
-	defer resp.Body.Close()
-	Logger.Printf("INFO Proxy service deletion for service " + proxyName + " completed. Response code: %d\n", resp.StatusCode)
-	return resp.StatusCode == http.StatusOK
 }
 
 func errorExists(e error) bool {

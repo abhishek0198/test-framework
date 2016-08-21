@@ -42,6 +42,7 @@ type Product struct {
 	Organization        string
 	Platform            string
 	Profile             []string
+	Smoke_Test_Path     string
 }
 
 type TestConfig struct {
